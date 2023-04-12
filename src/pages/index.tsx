@@ -6,12 +6,12 @@ interface Response {
 }
 
 const Home: React.FC = () => {
-  const [rating, setRating] = useState<number>(1);
+  const [rating, setRating] = useState<number>(1.0);
   const [description, setDescription] = useState<string>('');
   const [responses, setResponses] = useState<Response[]>([]);
 
   const handleRatingChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setRating(parseInt(event.target.value, 10));
+    setRating(parseFloat(event.target.value));
   };
 
   const handleDescriptionChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
@@ -37,6 +37,7 @@ const Home: React.FC = () => {
             value={rating}
             onChange={handleRatingChange}
             min="1"
+            step = "0.1"
             max="10"
             style={{color:'black'}}
           />
@@ -50,7 +51,7 @@ const Home: React.FC = () => {
             onChange={handleDescriptionChange}
             rows={5}
             cols={40}
-            style={{ resize: 'both', color: 'black'}}
+            style={{ resize: 'both', color: 'black', padding: '2px 5px'}}
           ></textarea>
         </div>
         <button type="submit">Submit</button>
