@@ -11,7 +11,7 @@ const Home: React.FC = () => {
   const [responses, setResponses] = useState<Response[]>([]);
 
   const handleRatingChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setRating(parseFloat(event.target.value));
+    setRating(parseInt(event.target.value, 10));
   };
 
   const handleDescriptionChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
@@ -37,7 +37,6 @@ const Home: React.FC = () => {
             value={rating}
             onChange={handleRatingChange}
             min="1"
-            step = "0.1"
             max="10"
             style={{color:'black'}}
           />
@@ -51,7 +50,7 @@ const Home: React.FC = () => {
             onChange={handleDescriptionChange}
             rows={5}
             cols={40}
-            style={{ resize: 'both', color: 'black', padding: '2px 5px'}}
+            style={{ resize: 'both', color: 'black'}}
           ></textarea>
         </div>
         <button type="submit">Submit</button>
