@@ -7,11 +7,9 @@ const Home: NextPage = () => {
   const [numberValue, setNumberValue] = useState<number | null>(null);
   const [output, setOutput] = useState('');
   const [apiOutput, setApiOutput] = useState<string>('');
-  const [isGenerating, setIsGenerating] = useState<boolean>(false);
   
   const callGenerateEndpoint = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsGenerating(true);
     
     console.log("Calling OpenAI...");
     const response = await fetch('/api/generate', {
@@ -27,7 +25,6 @@ const Home: NextPage = () => {
     console.log("OpenAI replied...", output.text);
   
     setApiOutput(`${output.text}`);
-    setIsGenerating(false);
   };
   
 
@@ -39,10 +36,10 @@ const Home: NextPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-r from-purple-500 via-pink-500 to-red-500">
       <Head>
-        <title>CheckNin</title>
+        <title>Check-N-In</title>
       </Head>
       <div className="container mx-auto p-4">
-        <h1 className="text-white text-4xl font-bold">CheckNin</h1>
+        <h1 className="text-white text-4xl font-bold">Check-N-In</h1>
         <p className="text-white mt-4">
           How was your day today? Rate your day out of 10
         </p>
@@ -80,7 +77,7 @@ const Home: NextPage = () => {
         <div className="output">
           <div className="output-header-container">
             <div className="output-header">
-              <h3>Output</h3>
+              <h3>Friend</h3>
             </div>
           </div>
           <div className="output-content">

@@ -6,7 +6,7 @@ const configuration = new Configuration({
 });
 
 const openai = new OpenAIApi(configuration);
-const basePromptPrefix = "";
+const basePromptPrefix = "act like a really good friend who is empathetic, positive, caring, and is always uplifting. Please respond to the following recap of my day:";
 
 const generateAction = async (req: NextApiRequest, res: NextApiResponse) => {
   // Run first prompt
