@@ -6,6 +6,27 @@ const Home: NextPage = () => {
   const [textValue, setTextValue] = useState('');
   const [numberValue, setNumberValue] = useState<number | null>(null);
   const [output, setOutput] = useState('');
+  const [apiOutput, setApiOutput] = useState<string>('');
+  
+  const callGenerateEndpoint = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    console.log("Calling OpenAI...");
+    const response = await fetch('/api/generate', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ userInput: textValue }),
+    });
+  
+    const data = await response.json();
+    const { output } = data;
+    console.log("OpenAI replied...", output.text);
+  
+    setApiOutput(`${output.text}`);
+  };
+  
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -15,14 +36,14 @@ const Home: NextPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-r from-purple-500 via-pink-500 to-red-500">
       <Head>
-        <title>CheckNin</title>
+        <title>Check-N-In</title>
       </Head>
       <div className="container mx-auto p-4">
-        <h1 className="text-white text-4xl font-bold">CheckNin</h1>
+        <h1 className="text-white text-4xl font-bold">Check-N-In</h1>
         <p className="text-white mt-4">
           How was your day today? Rate your day out of 10
         </p>
-        <form onSubmit={handleSubmit} className="mt-8">
+        <form onSubmit={(e) => callGenerateEndpoint(e)} className="mt-8">
           <input
             className="block w-full bg-white bg-opacity-20 text-white placeholder-white placeholder-opacity-50 border border-white border-opacity-20 rounded p-2 focus:outline-none focus:border-white"
             type="text"
@@ -51,6 +72,19 @@ const Home: NextPage = () => {
             <p>{output}</p>
           </div>
         )}
+
+{apiOutput && (
+        <div className="output">
+          <div className="output-header-container">
+            <div className="output-header">
+              <h3>Friend</h3>
+            </div>
+          </div>
+          <div className="output-content">
+            <p>{apiOutput}</p>
+          </div>
+        </div>
+      )}
       </div>
     </div>
   );
