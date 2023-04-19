@@ -52,19 +52,6 @@ const Home: NextPage = () => {
               <p>{output}</p>
             </div>
           )}
-  
-  {apiOutput && (
-          <div className="output">
-            <div className="output-header-container">
-              <div className="output-header">
-                <h3>Friend</h3>
-              </div>
-            </div>
-            <div className="output-content">
-              <p>{apiOutput}</p>
-            </div>
-          </div>
-        )}
         </div>
       </div>
     )
@@ -74,6 +61,12 @@ const Home: NextPage = () => {
       <Head>
         <title>Check-N-In</title>
       </Head>
+      <button
+            onClick={() => signOut()}
+            className="mt-4 ml-4 bg-white text-purple-500 font-bold py-1 px-2 rounded hover:bg-opacity-80 transition duration-150 ease-in-out"
+          >
+            Log Out
+          </button>
       <div className="container mx-auto p-4">
         <h1 className="text-white text-4xl font-bold">Check-N-In</h1>
         <p className="text-white mt-4">
