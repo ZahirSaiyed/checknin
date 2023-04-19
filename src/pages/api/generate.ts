@@ -6,20 +6,21 @@ const configuration = new Configuration({
 });
 
 const openai = new OpenAIApi(configuration);
-const basePromptPrefix = "act like a really good friend who is empathetic, positive, caring, and is always uplifting. Please respond to the following recap of my day:";
+
+const basePromptPrefix = "Act like a really good friend who is empathetic, positive, caring, and is always uplifting. Respond to the user's recap of their day";
 
 const generateAction = async (req: NextApiRequest, res: NextApiResponse) => {
-  // Run first prompt
-  console.log(`API: ${basePromptPrefix}${req.body.userInput}`);
 
-  const baseCompletion = await openai.createCompletion({
-    model: 'text-davinci-003',
-    prompt: `${basePromptPrefix}${req.body.userInput}`,
+  const baseCompletion = await openai.createChatCompletion({
+    model: 'gpt-3.5-turbo',
+    messages: [{role: "system", content: basePromptPrefix},{role: "user", content: req.body.userInput}],
+    //`${basePromptPrefix}${req.body.userInput}`,
     temperature: 0.7,
     max_tokens: 250,
   });
 
-  const basePromptOutput = baseCompletion.data.choices.pop();
+  const basePromptOutput = baseCompletion.data.choices[0].message?.content;
+  console.log(baseCompletion.data.choices[0].message?.content);
 
   res.status(200).json({ output: basePromptOutput });
 };
