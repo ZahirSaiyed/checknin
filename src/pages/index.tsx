@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import Head from 'next/head';
 import { NextPage } from 'next';
+import { useSession, signIn, signOut } from "next-auth/react"
 
 const Home: NextPage = () => {
+  const {data : session} = useSession();
   const [textValue, setTextValue] = useState('');
   const [numberValue, setNumberValue] = useState<number | null>(null);
   const [output, setOutput] = useState('');
@@ -27,17 +29,44 @@ const Home: NextPage = () => {
     setApiOutput(`${output.text}`);
   };
   
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setOutput(`Description: ${textValue}, Rating: ${numberValue}`);
   };
-
+  if (!session) {
+    return (
+      <div className="min-h-screen bg-gradient-to-r from-purple-500 via-pink-500 to-red-500">
+        <Head>
+          <title>Check-N-In</title>
+        </Head>
+        <div className="container mx-auto p-4">
+          <h1 className="text-white text-4xl font-bold">Check-N-In</h1>
+            <button
+              onClick={() => signIn()}
+              className="mt-4 bg-white text-purple-500 font-bold py-2 px-4 rounded hover:bg-opacity-80 transition duration-150 ease-in-out"
+            >
+              Log In
+            </button>
+          {output && (
+            <div className="mt-8 bg-white bg-opacity-20 text-white p-4 rounded">
+              <p>{output}</p>
+            </div>
+          )}
+        </div>
+      </div>
+    )
+  }
   return (
     <div className="min-h-screen bg-gradient-to-r from-purple-500 via-pink-500 to-red-500">
       <Head>
         <title>Check-N-In</title>
       </Head>
+      <button
+            onClick={() => signOut()}
+            className="mt-4 ml-4 bg-white text-purple-500 font-bold py-1 px-2 rounded hover:bg-opacity-80 transition duration-150 ease-in-out"
+          >
+            Log Out
+          </button>
       <div className="container mx-auto p-4">
         <h1 className="text-white text-4xl font-bold">Check-N-In</h1>
         <p className="text-white mt-4">
