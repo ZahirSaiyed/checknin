@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Head from 'next/head';
 import { NextPage } from 'next';
 import { useSession, signIn, signOut } from "next-auth/react"
@@ -10,7 +10,27 @@ const Home: NextPage = () => {
   const [numberValue, setNumberValue] = useState<number | null>(null);
   const [output, setOutput] = useState('');
   const [apiOutput, setApiOutput] = useState<string>('');
+  const [pastCheckins, setPastCheckins] = useState<InputData[]>([]);
   
+    // Fetch past check-ins when the component mounts
+    useEffect(() => {
+      if (session) {
+        fetch('/api/get-checkins', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ userId: session?.user?.email ?? 'unknown'}),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              setPastCheckins(data.checkins);
+            }
+          });
+      }
+    }, [session]);
+
   const saveUserInput = async (inputData: InputData) => {
     const response = await fetch('/api/save-input', {
       method: 'POST',
@@ -127,6 +147,21 @@ const Home: NextPage = () => {
             <p>{output}</p>
           </div>
         )}
+
+{pastCheckins && pastCheckins.length > 0 && (
+  <div className="mt-8">
+    <h2 className="text-white text-2xl font-bold">Past Check-Ins</h2>
+    <ul className="mt-4 space-y-4">
+      {pastCheckins.map((checkin, index) => (
+        <li key={index} className="bg-white bg-opacity-20 text-white p-4 rounded">
+          <p>Date: {new Date(checkin.timeStamp).toLocaleString()}</p>
+          <p>Description: {checkin.text}</p>
+          <p>Rating: {checkin.rating}</p>
+        </li>
+      ))}
+    </ul>
+  </div>
+)}
 
 {apiOutput && (
         <div className="output">
