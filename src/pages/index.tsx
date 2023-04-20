@@ -148,6 +148,20 @@ const Home: NextPage = () => {
           </div>
         )}
 
+
+{apiOutput && (
+        <div className="output">
+          <div className="output-header-container">
+            <div className="output-header">
+              <h3>Friend</h3>
+            </div>
+          </div>
+          <div className="output-content">
+            <p>{apiOutput}</p>
+          </div>
+        </div>
+      )}
+
 {pastCheckins && pastCheckins.length > 0 && (
   <div className="mt-8">
     <h2 className="text-white text-2xl font-bold">Past Check-Ins</h2>
@@ -162,19 +176,6 @@ const Home: NextPage = () => {
     </ul>
   </div>
 )}
-
-{apiOutput && (
-        <div className="output">
-          <div className="output-header-container">
-            <div className="output-header">
-              <h3>Friend</h3>
-            </div>
-          </div>
-          <div className="output-content">
-            <p>{apiOutput}</p>
-          </div>
-        </div>
-      )}
       </div>
     </div>
   );
