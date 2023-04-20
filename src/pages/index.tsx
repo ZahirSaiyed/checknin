@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Head from 'next/head';
 import { NextPage } from 'next';
 import { useSession, signIn, signOut } from "next-auth/react"
+import { InputData } from '../pages/api/types';
 
 const Home: NextPage = () => {
   const {data : session} = useSession();
@@ -9,9 +10,54 @@ const Home: NextPage = () => {
   const [numberValue, setNumberValue] = useState<number | null>(null);
   const [output, setOutput] = useState('');
   const [apiOutput, setApiOutput] = useState<string>('');
+  const [pastCheckins, setPastCheckins] = useState<InputData[]>([]);
   
+    // Fetch past check-ins when the component mounts
+    useEffect(() => {
+      if (session) {
+        fetch('/api/get-checkins', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ userId: session?.user?.email ?? 'unknown'}),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              setPastCheckins(data.checkins);
+            }
+          });
+      }
+    }, [session]);
+
+  const saveUserInput = async (inputData: InputData) => {
+    const response = await fetch('/api/save-input', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(inputData),
+    });
+  
+    if (!response.ok) {
+      const error = await response.json();
+      console.error('Error saving input:', error);
+    }
+  };
+
+
   const callGenerateEndpoint = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const inputData = {
+      userId: session?.user?.email ?? 'unknown', // assuming the user object has an 'id' field
+      text: textValue,
+      rating: numberValue || 0,
+      timeStamp: new Date(),
+    };
+  
+    await saveUserInput(inputData);
     
     console.log("Calling OpenAI...");
     const response = await fetch('/api/generate', {
@@ -102,6 +148,7 @@ const Home: NextPage = () => {
           </div>
         )}
 
+
 {apiOutput && (
         <div className="output">
           <div className="output-header-container">
@@ -114,6 +161,21 @@ const Home: NextPage = () => {
           </div>
         </div>
       )}
+
+{pastCheckins && pastCheckins.length > 0 && (
+  <div className="mt-8">
+    <h2 className="text-white text-2xl font-bold">Past Check-Ins</h2>
+    <ul className="mt-4 space-y-4">
+      {pastCheckins.map((checkin, index) => (
+        <li key={index} className="bg-white bg-opacity-20 text-white p-4 rounded">
+          <p>Date: {new Date(checkin.timeStamp).toLocaleString()}</p>
+          <p>Description: {checkin.text}</p>
+          <p>Rating: {checkin.rating}</p>
+        </li>
+      ))}
+    </ul>
+  </div>
+)}
       </div>
     </div>
   );
