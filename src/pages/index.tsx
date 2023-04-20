@@ -2,6 +2,7 @@ import { useState } from 'react';
 import Head from 'next/head';
 import { NextPage } from 'next';
 import { useSession, signIn, signOut } from "next-auth/react"
+import { InputData } from '../pages/api/types';
 
 const Home: NextPage = () => {
   const {data : session} = useSession();
@@ -10,8 +11,33 @@ const Home: NextPage = () => {
   const [output, setOutput] = useState('');
   const [apiOutput, setApiOutput] = useState<string>('');
   
+  const saveUserInput = async (inputData: InputData) => {
+    const response = await fetch('/api/save-input', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(inputData),
+    });
+  
+    if (!response.ok) {
+      const error = await response.json();
+      console.error('Error saving input:', error);
+    }
+  };
+
+
   const callGenerateEndpoint = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const inputData = {
+      userId: session?.user?.email ?? 'unknown', // assuming the user object has an 'id' field
+      text: textValue,
+      rating: numberValue || 0,
+      timeStamp: new Date(),
+    };
+  
+    await saveUserInput(inputData);
     
     console.log("Calling OpenAI...");
     const response = await fetch('/api/generate', {
