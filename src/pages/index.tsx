@@ -14,23 +14,25 @@ const Home: NextPage = () => {
   const [pastCheckins, setPastCheckins] = useState<OutputData[]>([]);
   
     // Fetch past check-ins when the component mounts
-    useEffect(() => {
-      if (session) {
-        fetch('/api/get-checkins', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ userId: session?.user?.email ?? 'unknown'}),
-        })
-          .then((response) => response.json())
-          .then((data) => {
-            if (data.success) {
-              setPastCheckins(data.checkins);
-            }
-          });
-      }
-    }, [session]);
+    useEffect(() => {fetchPastCheckins()}, [session]);
+
+  const fetchPastCheckins = () => {
+    if (session) {
+      fetch('/api/get-checkins', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId: session?.user?.email ?? 'unknown'}),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.success) {
+            setPastCheckins(data.checkins);
+          }
+        });
+    }
+  }
 
   const saveUserInput = async (inputData: InputData) => {
     const response = await fetch('/api/save-input', {
@@ -44,6 +46,8 @@ const Home: NextPage = () => {
     if (!response.ok) {
       const error = await response.json();
       console.error('Error saving input:', error);
+    } else {
+      fetchPastCheckins();
     }
   };
 
