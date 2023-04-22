@@ -168,7 +168,7 @@ const Home: NextPage = () => {
         </div>
       )}
 
-{pastCheckins && pastCheckins.length > 0 && (
+{/* {pastCheckins && pastCheckins.length > 0 && (
   <div className="mt-8">
     <h2 className="text-white text-2xl font-bold">Past Check-Ins</h2>
     <ul className="mt-4 space-y-4">
@@ -181,7 +181,7 @@ const Home: NextPage = () => {
       ))}
     </ul>
   </div>
-)}
+)} */}
       </div>
     </div>
   );
