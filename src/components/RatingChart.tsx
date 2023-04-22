@@ -63,6 +63,7 @@ const RatingChart: React.FC<RatingChartProps> = ({ checkins }) => {
     pointHoverBorderColor: "#ffffff",
     pointHoverBorderWidth: 2,
     pointHitRadius: 10,
+    height: "200px",
   };
 
   return (
