@@ -156,17 +156,15 @@ const Home: NextPage = () => {
 
 
 {apiOutput && (
-        <div className="output">
-          <div className="output-header-container">
-            <div className="output-header">
-              <h3>Friend</h3>
-            </div>
-          </div>
-          <div className="output-content">
-            <p>{apiOutput}</p>
-          </div>
+    <div className="output-container">
+        <div className="output-header">
+            <h3>Amicus</h3>
         </div>
-      )}
+        <div className="output-content">
+            <p>{apiOutput}</p>
+        </div>
+    </div>
+)}
       </div>
     </div>
   );
