@@ -7,14 +7,13 @@ const configuration = new Configuration({
 
 const openai = new OpenAIApi(configuration);
 
-const basePromptPrefix = "Act like a really good friend who is empathetic, positive, caring, and is always uplifting. Respond to the user's recap of their day";
+const basePromptPrefix = "Act like a really good friend who is empathetic, positive, caring, and is always uplifting. Respond to the user's recap of their day which includes a mood rating from 1-10";
 
 const generateAction = async (req: NextApiRequest, res: NextApiResponse) => {
 
   const baseCompletion = await openai.createChatCompletion({
     model: 'gpt-3.5-turbo',
     messages: [{role: "system", content: basePromptPrefix},{role: "user", content: req.body.userInput}],
-    //`${basePromptPrefix}${req.body.userInput}`,
     temperature: 0.7,
     max_tokens: 250,
   });

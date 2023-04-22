@@ -65,7 +65,7 @@ const Home: NextPage = () => {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ userInput: textValue }),
+      body: JSON.stringify({ userInput: `Mood: ${numberValue}\n`+textValue }),
     });
   
     const data = await response.json();
