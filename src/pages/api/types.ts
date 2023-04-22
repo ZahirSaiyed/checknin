@@ -4,7 +4,7 @@ export type InputData = {
     text: string;
     rating: number;
     timeStamp: Date;
-    //replies: [string, string][];
+    replies: [string, string][];
   };  
 
   export type OutputData = {
@@ -13,5 +13,5 @@ export type InputData = {
     text: string;
     rating: number;
     timeStamp: Date;
-    //replies: [string, string][];
+    replies: [string, string][];
   };  

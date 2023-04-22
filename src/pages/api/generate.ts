@@ -12,9 +12,9 @@ const basePromptPrefix = "Act like a really good friend who is empathetic, posit
 const generateAction = async (req: NextApiRequest, res: NextApiResponse) => {
 
   const baseCompletion = await openai.createChatCompletion({
+    //for reply in user replies, add reply
     model: 'gpt-3.5-turbo',
     messages: [{role: "system", content: basePromptPrefix},{role: "user", content: req.body.userInput}],
-    //`${basePromptPrefix}${req.body.userInput}`,
     temperature: 0.7,
     max_tokens: 250,
   });

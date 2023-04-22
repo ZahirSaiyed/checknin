@@ -55,14 +55,15 @@ const Home: NextPage = () => {
   const callGenerateEndpoint = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    const emptyReplies : [string, string][] = [] 
+
     const inputData = {
       userId: session?.user?.email ?? 'unknown', // assuming the user object has an 'id' field
       text: textValue,
       rating: numberValue || 0,
       timeStamp: new Date(),
+      replies: emptyReplies,
     };
-  
-    await saveUserInput(inputData);
     
     console.log("Calling OpenAI...");
     const response = await fetch('/api/generate', {
@@ -76,8 +77,10 @@ const Home: NextPage = () => {
     const data = await response.json();
     const { output } = data;
     console.log("OpenAI replied...", output);
+    inputData.replies.push(["Nin",output])
   
     setApiOutput(`${output}`);
+    await saveUserInput(inputData);
   };
   
   const handleSubmit = (e: React.FormEvent) => {
@@ -181,6 +184,7 @@ const Home: NextPage = () => {
           <p>Date: {new Date(checkin.timeStamp).toLocaleString()}</p>
           <p>Description: {checkin.text}</p>
           <p>Rating: {checkin.rating}</p>
+          <p>Replies: {checkin.replies?.length}</p>
           </Link>
         </li>
         
