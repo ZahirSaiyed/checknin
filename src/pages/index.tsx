@@ -3,6 +3,7 @@ import Head from 'next/head';
 import { NextPage } from 'next';
 import { useSession, signIn, signOut } from "next-auth/react"
 import { InputData } from '../pages/api/types';
+import Header from '../components/Header';
 
 const Home: NextPage = () => {
   const {data : session} = useSession();
@@ -111,12 +112,13 @@ const Home: NextPage = () => {
       <Head>
         <title>Check-N-In</title>
       </Head>
-      <button
+      <Header />
+      {/* <button
             onClick={() => signOut()}
             className="mt-4 ml-4 bg-white text-purple-500 font-bold py-1 px-2 rounded hover:bg-opacity-80 transition duration-150 ease-in-out"
           >
             Log Out
-          </button>
+          </button> */}
       <div className="container mx-auto p-4">
         <h1 className="text-white text-4xl font-bold">Check-N-In</h1>
         <p className="text-white mt-4">
