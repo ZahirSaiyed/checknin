@@ -40,7 +40,7 @@ const RatingChart: React.FC<RatingChartProps> = ({ checkins }) => {
           color: "#ffffff",
         },
         grid: {
-          display: false,
+          display: false
         },
         beginAtZero: true,
         max: 10,
@@ -50,6 +50,20 @@ const RatingChart: React.FC<RatingChartProps> = ({ checkins }) => {
       legend: {
         display: false,
       },
+      title: {
+        display: true,
+        text: 'Ratings Over Time',
+        font: {
+          size: 24,
+          weight: 'bold',
+          family: "'Inter', sans-serif"
+        },
+        color: "#ffffff",
+        padding: {
+          top: 20,
+          bottom: 10
+        }
+      }
     },
     responsive: true,
     maintainAspectRatio: true,
@@ -62,16 +76,16 @@ const RatingChart: React.FC<RatingChartProps> = ({ checkins }) => {
     pointHoverBorderColor: "#ffffff",
     pointHoverBorderWidth: 2,
     pointHitRadius: 10,
-    width: "100%",
   };
 
   return (
     <div className="p-4">
-      <div className="bg-black rounded-lg shadow-md p-6" style={{ maxHeight: "400px" }}>
+      <div className="bg-black rounded-lg shadow-md p-6" style={{ height: "400px" }}>
         <Line data={data} options={options} />
       </div>
     </div>
   );
+
 };
 
 export default RatingChart;
