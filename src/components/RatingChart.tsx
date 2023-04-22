@@ -7,7 +7,7 @@ Chart.register(CategoryScale, LinearScale, LineElement);
 
 interface RatingChartProps {
   checkins: InputData[];
-} 
+}
 
 const RatingChart: React.FC<RatingChartProps> = ({ checkins }) => {
   const data = {
@@ -40,8 +40,7 @@ const RatingChart: React.FC<RatingChartProps> = ({ checkins }) => {
           color: "#ffffff",
         },
         grid: {
-          color: "#ffffff",
-          borderColor: "#ffffff",
+          display: false,
         },
         beginAtZero: true,
         max: 10,
@@ -63,12 +62,14 @@ const RatingChart: React.FC<RatingChartProps> = ({ checkins }) => {
     pointHoverBorderColor: "#ffffff",
     pointHoverBorderWidth: 2,
     pointHitRadius: 10,
-    height: "200px",
+    width: "100%",
   };
 
   return (
     <div className="p-4">
-      <Line data={data} options={options} />
+      <div className="bg-black rounded-lg shadow-md p-6" style={{ maxHeight: "400px" }}>
+        <Line data={data} options={options} />
+      </div>
     </div>
   );
 };
