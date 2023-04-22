@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import Head from 'next/head';
 import { NextPage } from 'next';
 import { useSession, signIn, signOut } from "next-auth/react"
-import { InputData } from '../pages/api/types';
+import { InputData, OutputData } from '../pages/api/types';
+import Link from 'next/link';
 
 const Home: NextPage = () => {
   const {data : session} = useSession();
@@ -10,7 +11,7 @@ const Home: NextPage = () => {
   const [numberValue, setNumberValue] = useState<number | null>(null);
   const [output, setOutput] = useState('');
   const [apiOutput, setApiOutput] = useState<string>('');
-  const [pastCheckins, setPastCheckins] = useState<InputData[]>([]);
+  const [pastCheckins, setPastCheckins] = useState<OutputData[]>([]);
   
     // Fetch past check-ins when the component mounts
     useEffect(() => {
@@ -167,11 +168,18 @@ const Home: NextPage = () => {
     <h2 className="text-white text-2xl font-bold">Past Check-Ins</h2>
     <ul className="mt-4 space-y-4">
       {pastCheckins.map((checkin, index) => (
-        <li key={index} className="bg-white bg-opacity-20 text-white p-4 rounded">
+        
+        <li 
+          key={index}
+          className="bg-white bg-opacity-20 text-white p-4 rounded"
+        >
+          <Link href={`checkin/${checkin._id}`}>
           <p>Date: {new Date(checkin.timeStamp).toLocaleString()}</p>
           <p>Description: {checkin.text}</p>
           <p>Rating: {checkin.rating}</p>
+          </Link>
         </li>
+        
       ))}
     </ul>
   </div>
