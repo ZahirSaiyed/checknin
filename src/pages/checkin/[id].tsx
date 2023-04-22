@@ -12,13 +12,31 @@ const CheckIn: NextPage = () => {
     const [thread, setThread] = useState<OutputData>();
     const [textValue, setTextValue] = useState('');
 
-    useEffect(() => {console.log(id); fetchThread(id?.toString() || null)}, [session, router]);
-    useEffect(() => {setTextValue("@Nin ")}, [thread])
+    useEffect(() => {fetchThread(id?.toString() || null)}, [session, router]);
+    //useEffect(() => {setTextValue("@Nin ")}, [thread])
+
+    const saveThread = async (thread: OutputData) => {
+        const response = await fetch('/api/update-thread', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(thread),
+        });
+        if (!response.ok) {
+          const error = await response.json();
+          console.error('Error saving input:', error);
+        }
+      };
 
     const submitReply = async (e: React.FormEvent) => {
         e.preventDefault();
         if (session?.user?.email && thread) {
-            thread?.replies.push([session.user.email,textValue])
+            if (thread.replies) {
+                thread.replies.push([session.user.email,textValue])
+            } else {
+                thread.replies = [[session.user.email,textValue]]
+            }
             console.log("Calling OpenAI...");
             const response = await fetch('/api/generate', {
             method: 'POST',
@@ -27,6 +45,12 @@ const CheckIn: NextPage = () => {
             },
             body: JSON.stringify({ userInput: thread.text, replies: thread.replies}),
             });
+            const data = await response.json();
+            const { output } = data;
+            console.log("OpenAI replied...", output);
+            thread.replies.push(["Nin",output])
+            await saveThread(thread);
+            fetchThread(id?.toString() || null);
         }
     }
 
@@ -56,6 +80,27 @@ const CheckIn: NextPage = () => {
                 <p>Mood: {thread.rating}</p>
                 <p>{thread.text}</p>
                 </div>
+                <div className="ml-32 mr-16 mt-8" >
+                    <ul className="mt-4 mb-4 space-y-4">
+                    {thread?.replies?.map(([user,text], index) => (
+        
+                        <li 
+                        key={index}
+                        className="bg-white bg-opacity-20 text-white p-4 rounded"
+                        >
+                        <b>{user}</b>
+                        <p> {text}</p>
+                        {/* <button
+                            className="ml-2 text-gray-100 text-xs"
+                            onClick = {() => setTextValue("@Nin "+textValue)}
+                        >
+                            Reply
+                        </button> */}
+                        </li>
+                        
+                    ))}
+                    </ul>
+                </div>
                 <form onSubmit={(e) => submitReply(e)} className="mt-8 ml-8">
                 <input
                     className="block w-full bg-white bg-opacity-20 text-white placeholder-white placeholder-opacity-50 border border-white border-opacity-20 rounded p-2 focus:outline-none focus:border-white"
@@ -71,27 +116,6 @@ const CheckIn: NextPage = () => {
                     Submit
                 </button>
                 </form>
-                <div className="ml-32 mr-16 mt-8" >
-                    <ul className="mt-4 space-y-4">
-                    {thread.replies.map(([user,text], index) => (
-        
-                        <li 
-                        key={index}
-                        className="bg-white bg-opacity-20 text-white p-4 rounded"
-                        >
-                        <b>{user}</b>
-                        <p> {text}</p>
-                        <button
-                            className="ml-2 text-gray-100 text-xs"
-                            onClick = {() => setTextValue("@Nin "+textValue)}
-                        >
-                            Reply
-                        </button>
-                        </li>
-                        
-                    ))}
-                    </ul>
-                </div>
             </div>
         )
     } else {
