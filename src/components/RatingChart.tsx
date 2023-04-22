@@ -24,24 +24,46 @@ const RatingChart: React.FC<RatingChartProps> = ({ checkins }) => {
     ],
   };
 
-const options = {
-  scales: {
-    x: {
-      ticks: {
-        reverse: true
-      }
+  const options = {
+    scales: {
+      x: {
+        ticks: {
+          color: "#ffffff",
+          reverse: true,
+        },
+        grid: {
+          display: false,
+        },
+      },
+      y: {
+        ticks: {
+          color: "#ffffff",
+        },
+        grid: {
+          color: "#ffffff",
+          borderColor: "#ffffff",
+        },
+        beginAtZero: true,
+        max: 10,
+      },
     },
-    y: {
-      beginAtZero: true,
-      max: 10
-    }
-  },
-  plugins: {
-    legend: {
-      display: false
-    }
-  }
-};
+    plugins: {
+      legend: {
+        display: false,
+      },
+    },
+    responsive: true,
+    maintainAspectRatio: true,
+    interaction: {
+      intersect: false,
+      mode: "index",
+    },
+    pointHoverRadius: 8,
+    pointHoverBackgroundColor: "#ffffff",
+    pointHoverBorderColor: "#ffffff",
+    pointHoverBorderWidth: 2,
+    pointHitRadius: 10,
+  };
 
   return (
     <div className="p-4">
