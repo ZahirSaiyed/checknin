@@ -167,21 +167,6 @@ const Home: NextPage = () => {
           </div>
         </div>
       )}
-
-{/* {pastCheckins && pastCheckins.length > 0 && (
-  <div className="mt-8">
-    <h2 className="text-white text-2xl font-bold">Past Check-Ins</h2>
-    <ul className="mt-4 space-y-4">
-      {pastCheckins.map((checkin, index) => (
-        <li key={index} className="bg-white bg-opacity-20 text-white p-4 rounded">
-          <p>Date: {new Date(checkin.timeStamp).toLocaleString()}</p>
-          <p>Description: {checkin.text}</p>
-          <p>Rating: {checkin.rating}</p>
-        </li>
-      ))}
-    </ul>
-  </div>
-)} */}
       </div>
     </div>
   );
