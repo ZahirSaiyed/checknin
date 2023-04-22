@@ -3,6 +3,7 @@ import { NextPage } from "next";
 import { useSession } from "next-auth/react";
 import { InputData } from "./api/types";
 import Header from "../components/Header";
+import RatingChart from "../components/RatingChart";
 
 const PastCheckins: NextPage = () => {
   const { data: session } = useSession();
@@ -35,6 +36,11 @@ const PastCheckins: NextPage = () => {
       <Header />
       <div className="container mx-auto p-4">
         <h1 className="text-white text-4xl font-bold">Past Checkins</h1>
+        {pastCheckins.length > 0 && (
+        <div className="my-8">
+          <RatingChart checkins={pastCheckins} />
+        </div>
+      )}
         <ul className="mt-4 space-y-4">
           {pastCheckins.map((checkin, index) => (
             <li
