@@ -72,7 +72,7 @@ const RatingChart: React.FC<RatingChartProps> = ({ checkins }) => {
     aspectRatio: 2,
     interaction: {
       intersect: false,
-      mode: "index",
+      mode: "index" as const,
     },
     pointHoverRadius: 8,
     pointHoverBackgroundColor: "#ffffff",
