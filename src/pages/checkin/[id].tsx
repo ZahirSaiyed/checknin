@@ -73,54 +73,67 @@ const CheckIn: NextPage = () => {
         }
     }
 
+    const isReplyFromAI = (user: string) => user === "Nin";
+
     if (thread && session?.user?.email === thread?.userId) {
         return (
             <div className="min-h-screen bg-gradient-to-r from-purple-500 via-pink-500 to-red-500">
                 <Header />
-                <div className="bg-white bg-opacity-20 text-white p-4 rounded"> 
-                <p>{new Date(thread.timeStamp).toLocaleString()}</p>
-                <p>Mood: {thread.rating}</p>
-                <p>{thread.text}</p>
+                <div className="bg-white bg-opacity-20 text-white p-4 rounded max-w-2xl mx-auto my-6"> 
+                    <p>{new Date(thread.timeStamp).toLocaleString()}</p>
+                    <p>Mood: {thread.rating}</p>
+                    <p>{thread.text}</p>
                 </div>
-                <div className="ml-32 mr-16 mt-8" >
-                    <ul className="mt-4 mb-4 space-y-4">
-                    {thread?.replies?.map(([user,text], index) => (
-        
-                        <li 
-                        key={index}
-                        className="bg-white bg-opacity-20 text-white p-4 rounded"
+                <div className="max-w-2xl mx-auto my-6 bg-white bg-opacity-10 rounded-lg h-96 overflow-y-auto space-y-4 p-4">
+                    {thread?.replies?.map(([user, text], index) => (
+                        <div
+                            key={index}
+                            className={`p-4 rounded ${
+                                isReplyFromAI(user)
+                                ? "bg-green-400 text-white"
+                                : "bg-gray-200 text-gray-800"
+                            }`}
                         >
-                        <b>{user}</b>
-                        <p> {text}</p>
-                        {/* <button
-                            className="ml-2 text-gray-100 text-xs"
-                            onClick = {() => setTextValue("@Nin "+textValue)}
-                        >
-                            Reply
-                        </button> */}
-                        </li>
-                        
+                            <b>{user}</b>
+                            <p> {text}</p>
+                        </div>
                     ))}
-                    </ul>
                 </div>
-                <form onSubmit={(e) => submitReply(e)} className="mt-8 ml-8">
-                <input
-                    className="block w-full bg-white bg-opacity-20 text-white placeholder-white placeholder-opacity-50 border border-white border-opacity-20 rounded p-2 focus:outline-none focus:border-white"
-                    type="text"
-                    placeholder="Enter text here"
-                    value={textValue}
-                    onChange={(e) => setTextValue(e.target.value)}
-                />
-                <button
-                    className="mt-4 bg-white text-purple-500 font-bold py-2 px-4 rounded hover:bg-opacity-80 transition duration-150 ease-in-out"
-                    type="submit"
-                >
-                    Submit
-                </button>
+                <style jsx>{`
+                    ::-webkit-scrollbar {
+                        width: 10px;
+                    }
+    
+                    ::-webkit-scrollbar-track {
+                        background-color: rgba(255, 255, 255, 0.1);
+                        border-radius: 5px;
+                    }
+    
+                    ::-webkit-scrollbar-thumb {
+                        background-color: rgba(255, 255, 255, 0.4);
+                        border-radius: 5px;
+                    }
+                `}</style>
+                <form onSubmit={(e) => submitReply(e)} className="max-w-2xl mx-auto my-6 px-4">
+                    <label htmlFor="reply-input" className="block text-white mb-2">Your Reply:</label>
+                    <input
+                        id="reply-input"
+                        className="block w-full bg-white bg-opacity-20 text-white placeholder-white placeholder-opacity-50 border border-white border-opacity-20 rounded p-2 focus:outline-none focus:border-white"
+                        type="text"
+                        placeholder="Enter text here"
+                        value={textValue}
+                        onChange={(e) => setTextValue(e.target.value)}
+                    />
+                    <button
+                        className="mt-4 bg-white text-purple-500 font-bold py-2 px-4 rounded hover:bg-opacity-80 transition duration-150 ease-in-out"
+                        type="submit"
+                    >
+                        Submit
+                    </button>
                 </form>
             </div>
         )
-    } else {
+    }  else {
         return (
         <div className="min-h-screen bg-gradient-to-r from-purple-500 via-pink-500 to-red-500">
             <p>Improper permissions</p>
