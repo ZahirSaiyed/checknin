@@ -1,6 +1,6 @@
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef} from 'react';
 import { OutputData } from '../../pages/api/types';
 import { useSession } from "next-auth/react";
 import Link from 'next/link';
@@ -13,9 +13,18 @@ const CheckIn: NextPage = () => {
     const [thread, setThread] = useState<OutputData>();
     const [textValue, setTextValue] = useState('');
     const [isAITyping, setIsAITyping] = useState(false);
+    const chatBottomRef = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {fetchThread(id?.toString() || null)}, [session, router]);
     //useEffect(() => {setTextValue("@Nin ")}, [thread])
+    useEffect(() => {
+        scrollToBottom();
+    }, [thread?.replies ?? []]);
+
+    const scrollToBottom = () => {
+        chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    };
+    
 
     const saveThread = async (thread: OutputData) => {
         const response = await fetch('/api/update-thread', {
@@ -40,12 +49,13 @@ const CheckIn: NextPage = () => {
         if (session?.user?.email && thread) {
         // Show user input immediately
         thread.replies.push([session.user.email, textValue]);
+
         setThread({ ...thread });
         setTextValue('');
-
         setIsAITyping(true); // Set AI typing status to true
+        scrollToBottom();
 
-        console.log("Calling OpenAI...");
+        //console.log("Calling OpenAI...");
         const response = await fetch('/api/generate', {
             method: 'POST',
             headers: {
@@ -55,7 +65,7 @@ const CheckIn: NextPage = () => {
         });
         const data = await response.json();
         const { output } = data;
-        console.log("OpenAI replied...", output);
+        //console.log("OpenAI replied...", output);
 
         // Remove user input from thread replies (it will be added back with AI response)
         thread.replies.pop();
@@ -65,7 +75,7 @@ const CheckIn: NextPage = () => {
 
         await saveThread(thread);
         fetchThread(id?.toString() || null);
-
+        scrollToBottom();
         setIsAITyping(false); // Set AI typing status to false
         }
     }
@@ -119,6 +129,7 @@ const CheckIn: NextPage = () => {
                 <p>...</p>
             </div>
         )}
+        <div ref={chatBottomRef} />
     </div>
                 <style jsx>{`
                     ::-webkit-scrollbar {
