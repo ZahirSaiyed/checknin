@@ -84,7 +84,9 @@ const RatingChart: React.FC<RatingChartProps> = ({ checkins }) => {
   return (
     <div className="p-4">
       <div className="bg-black rounded-lg shadow-md p-6 h-auto">
-        <Line data={data} options={options} />
+        <div style={{ height: '50vh' }}>
+          <Line data={data} options={options} />
+        </div>
       </div>
     </div>
   );  
