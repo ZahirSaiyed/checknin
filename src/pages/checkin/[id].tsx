@@ -32,6 +32,10 @@ const CheckIn: NextPage = () => {
 
     const submitReply = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!textValue.trim()) {
+            return;
+        }
+
         if (session?.user?.email && thread) {
             if (thread.replies) {
                 thread.replies.push([session.user.email,textValue])
