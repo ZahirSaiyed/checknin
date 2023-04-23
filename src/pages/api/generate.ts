@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { Configuration, OpenAIApi } from 'openai';
+import { Configuration, OpenAIApi, ChatCompletionRequestMessage } from 'openai';
 
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY as string,
@@ -11,9 +11,19 @@ const basePromptPrefix = "Act like a really good friend who is empathetic, posit
 
 const generateAction = async (req: NextApiRequest, res: NextApiResponse) => {
 
+  const messages : Array<ChatCompletionRequestMessage> = [{role: "system", content: basePromptPrefix},{role: "user", content: req.body.userInput}];
+  req.body.replies?.forEach( ([user,reply]: [string,string]) => {
+    if (user=="Nin") {
+      messages.push({role: "system", content: reply})
+    } else {
+      messages.push({role: "user", content: reply})
+    }
+  })
+
   const baseCompletion = await openai.createChatCompletion({
+    //for reply in user replies, add reply
     model: 'gpt-3.5-turbo',
-    messages: [{role: "system", content: basePromptPrefix},{role: "user", content: req.body.userInput}],
+    messages: messages,
     temperature: 0.7,
     max_tokens: 250,
   });

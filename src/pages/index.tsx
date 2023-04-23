@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react';
 import Head from 'next/head';
 import { NextPage } from 'next';
 import { useSession, signIn, signOut } from "next-auth/react"
-import { InputData } from '../pages/api/types';
 import Header from '../components/Header';
+import { InputData, OutputData } from '../pages/api/types';
+import Link from 'next/link';
 
 const Home: NextPage = () => {
   const {data : session} = useSession();
@@ -11,8 +12,8 @@ const Home: NextPage = () => {
   const [numberValue, setNumberValue] = useState<number | null>(null);
   const [output, setOutput] = useState('');
   const [apiOutput, setApiOutput] = useState<string>('');
-  const [pastCheckins, setPastCheckins] = useState<InputData[]>([]);
-
+  const [pastCheckins, setPastCheckins] = useState<OutputData[]>([]);
+  
     // Fetch past check-ins when the component mounts
     useEffect(() => {fetchPastCheckins()}, [session]);
 
@@ -55,14 +56,15 @@ const Home: NextPage = () => {
   const callGenerateEndpoint = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    const emptyReplies : [string, string][] = [] 
+
     const inputData = {
       userId: session?.user?.email ?? 'unknown', // assuming the user object has an 'id' field
       text: textValue,
       rating: numberValue || 0,
       timeStamp: new Date(),
+      replies: emptyReplies,
     };
-  
-    await saveUserInput(inputData);
     
     console.log("Calling OpenAI...");
     const response = await fetch('/api/generate', {
@@ -76,8 +78,10 @@ const Home: NextPage = () => {
     const data = await response.json();
     const { output } = data;
     console.log("OpenAI replied...", output);
+    inputData.replies.push(["Nin",output])
   
     setApiOutput(`${output}`);
+    await saveUserInput(inputData);
   };
   
   const handleSubmit = (e: React.FormEvent) => {
