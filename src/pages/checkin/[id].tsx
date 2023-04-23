@@ -12,6 +12,7 @@ const CheckIn: NextPage = () => {
     const { id } = router.query;
     const [thread, setThread] = useState<OutputData>();
     const [textValue, setTextValue] = useState('');
+    const [isAITyping, setIsAITyping] = useState(false);
 
     useEffect(() => {fetchThread(id?.toString() || null)}, [session, router]);
     //useEffect(() => {setTextValue("@Nin ")}, [thread])
@@ -37,26 +38,35 @@ const CheckIn: NextPage = () => {
         }
 
         if (session?.user?.email && thread) {
-            if (thread.replies) {
-                thread.replies.push([session.user.email,textValue])
-            } else {
-                thread.replies = [[session.user.email,textValue]]
-            }
-            console.log("Calling OpenAI...");
-            const response = await fetch('/api/generate', {
+        // Show user input immediately
+        thread.replies.push([session.user.email, textValue]);
+        setThread({ ...thread });
+        setTextValue('');
+
+        setIsAITyping(true); // Set AI typing status to true
+
+        console.log("Calling OpenAI...");
+        const response = await fetch('/api/generate', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ userInput: thread.text, replies: thread.replies}),
-            });
-            const data = await response.json();
-            const { output } = data;
-            console.log("OpenAI replied...", output);
-            thread.replies.push(["Nin",output])
-            await saveThread(thread);
-            fetchThread(id?.toString() || null);
-            setTextValue('')
+            body: JSON.stringify({ userInput: thread.text, replies: thread.replies }),
+        });
+        const data = await response.json();
+        const { output } = data;
+        console.log("OpenAI replied...", output);
+
+        // Remove user input from thread replies (it will be added back with AI response)
+        thread.replies.pop();
+
+        // Add both user input and AI response to the thread replies
+        thread.replies.push([session.user.email, textValue], ["Nin", output]);
+
+        await saveThread(thread);
+        fetchThread(id?.toString() || null);
+
+        setIsAITyping(false); // Set AI typing status to false
         }
     }
 
@@ -90,20 +100,26 @@ const CheckIn: NextPage = () => {
                     <p>{thread.text}</p>
                 </div>
                 <div className="max-w-2xl mx-auto my-6 bg-white bg-opacity-10 rounded-lg h-96 overflow-y-auto space-y-4 p-4">
-                    {thread?.replies?.map(([user, text], index) => (
-                        <div
-                            key={index}
-                            className={`p-4 rounded ${
-                                isReplyFromAI(user)
-                                ? "bg-blue-400 text-white"
-                                : "bg-gray-200 text-gray-800"
-                            }`}
-                        >
-                            <b>{user}</b>
-                            <p> {text}</p>
-                        </div>
-                    ))}
-                </div>
+        {thread?.replies?.map(([user, text], index) => (
+            <div
+                key={index}
+                className={`p-4 rounded ${
+                    isReplyFromAI(user)
+                    ? "bg-blue-400 text-white"
+                    : "bg-gray-200 text-gray-800"
+                }`}
+            >
+                <b>{user}</b>
+                <p> {text}</p>
+            </div>
+        ))}
+        {isAITyping && (
+            <div className="p-4 rounded bg-blue-400 text-white">
+                <b>Nin</b>
+                <p>...</p>
+            </div>
+        )}
+    </div>
                 <style jsx>{`
                     ::-webkit-scrollbar {
                         width: 10px;
