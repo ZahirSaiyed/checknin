@@ -6,13 +6,13 @@ const Header = () => {
 
   return (
     <header className="flex justify-between items-center py-4 px-6 bg-white bg-opacity-20">
-      <nav className="flex items-center">
+      <nav className="flex items-center space-x-4">
         <Link href="/" passHref>
           <button className="text-white font-bold hover:underline focus:outline-none">Home</button>
         </Link>
 
         <Link href="/past-checkins" passHref>
-          <button className="ml-4 text-white font-bold hover:underline focus:outline-none">Past Checkins</button>
+          <button className="text-white font-bold hover:underline focus:outline-none">Past Checkins</button>
         </Link>
       </nav>
 
