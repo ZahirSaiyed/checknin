@@ -4,6 +4,7 @@ import { NextPage } from 'next';
 import { useSession, signIn, signOut } from "next-auth/react"
 import { InputData, OutputData } from '../pages/api/types';
 import Link from 'next/link';
+import Header from '../components/Header';
 
 const Home: NextPage = () => {
   const {data : session} = useSession();
