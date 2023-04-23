@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { OutputData } from '../../pages/api/types';
 import { useSession } from "next-auth/react";
 import Link from 'next/link';
+import Header from '../../components/Header';
 
 const CheckIn: NextPage = () => {
     const {data : session} = useSession();
@@ -75,6 +76,7 @@ const CheckIn: NextPage = () => {
     if (thread && session?.user?.email === thread?.userId) {
         return (
             <div className="min-h-screen bg-gradient-to-r from-purple-500 via-pink-500 to-red-500">
+                <Header />
                 <div className="bg-white bg-opacity-20 text-white p-4 rounded"> 
                 <p>{new Date(thread.timeStamp).toLocaleString()}</p>
                 <p>Mood: {thread.rating}</p>
