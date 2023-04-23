@@ -3,7 +3,6 @@ import Head from 'next/head';
 import { NextPage } from 'next';
 import { useSession, signIn, signOut } from "next-auth/react"
 import { InputData, OutputData } from '../pages/api/types';
-import Link from 'next/link';
 import Header from '../components/Header';
 
 const Home: NextPage = () => {
@@ -116,12 +115,13 @@ const Home: NextPage = () => {
       <Head>
         <title>Check-N-In</title>
       </Head>
-      <button
+      <Header />
+      {/*<button
             onClick={() => signOut()}
             className="mt-4 ml-4 bg-white text-purple-500 font-bold py-1 px-2 rounded hover:bg-opacity-80 transition duration-150 ease-in-out"
           >
             Log Out
-          </button>
+      </button>*/}
       <div className="container mx-auto p-4">
         <h1 className="text-white text-4xl font-bold">Check-N-In</h1>
         <p className="text-white mt-4">
@@ -159,40 +159,15 @@ const Home: NextPage = () => {
 
 
 {apiOutput && (
-        <div className="output">
-          <div className="output-header-container">
-            <div className="output-header">
-              <h3>Friend</h3>
-            </div>
+        <div className="output-container">
+          <div className="output-header">
+            <h3>Nin</h3>
           </div>
           <div className="output-content">
             <p>{apiOutput}</p>
           </div>
         </div>
-      )}
-
-{pastCheckins && pastCheckins.length > 0 && (
-  <div className="mt-8">
-    <h2 className="text-white text-2xl font-bold">Past Check-Ins</h2>
-    <ul className="mt-4 space-y-4">
-      {pastCheckins.map((checkin, index) => (
-        
-        <li 
-          key={index}
-          className="bg-white bg-opacity-20 text-white p-4 rounded"
-        >
-          <Link href={`checkin/${checkin._id}`}>
-          <p>Date: {new Date(checkin.timeStamp).toLocaleString()}</p>
-          <p>Description: {checkin.text}</p>
-          <p>Rating: {checkin.rating}</p>
-          <p>Replies: {checkin.replies?.length}</p>
-          </Link>
-        </li>
-        
-      ))}
-    </ul>
-  </div>
-)}
+  )}
       </div>
     </div>
   );
