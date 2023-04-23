@@ -90,7 +90,7 @@ const CheckIn: NextPage = () => {
                             key={index}
                             className={`p-4 rounded ${
                                 isReplyFromAI(user)
-                                ? "bg-green-400 text-white"
+                                ? "bg-blue-400 text-white"
                                 : "bg-gray-200 text-gray-800"
                             }`}
                         >
