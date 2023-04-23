@@ -52,6 +52,7 @@ const CheckIn: NextPage = () => {
             thread.replies.push(["Nin",output])
             await saveThread(thread);
             fetchThread(id?.toString() || null);
+            setTextValue('')
         }
     }
 
