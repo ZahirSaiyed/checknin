@@ -89,23 +89,21 @@ const Home: NextPage = () => {
   };
   if (!session) {
     return (
-      <div className="min-h-screen bg-gradient-to-r from-purple-500 via-pink-500 to-red-500">
+      <div className="min-h-screen bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 flex flex-col items-center justify-center">
         <Head>
           <title>Check-N-In</title>
         </Head>
-        <div className="container mx-auto p-4">
-          <h1 className="text-white text-4xl font-bold">Check-N-In</h1>
-            <button
-              onClick={() => signIn()}
-              className="mt-4 bg-white text-purple-500 font-bold py-2 px-4 rounded hover:bg-opacity-80 transition duration-150 ease-in-out"
-            >
-              Log In
-            </button>
-          {output && (
-            <div className="mt-8 bg-white bg-opacity-20 text-white p-4 rounded">
-              <p>{output}</p>
-            </div>
-          )}
+        <div className="text-center">
+          <h1 className="text-white text-6xl font-bold">Check-N-In</h1>
+          <p className="text-white text-xl mt-4 mb-8">
+            Track your daily emotions and gain insights.
+          </p>
+          <button
+            onClick={() => signIn()}
+            className="bg-white text-purple-500 font-bold py-2 px-4 rounded hover:bg-opacity-80 transition duration-150 ease-in-out"
+          >
+            Log In
+          </button>
         </div>
       </div>
     )
@@ -116,12 +114,6 @@ const Home: NextPage = () => {
         <title>Check-N-In</title>
       </Head>
       <Header />
-      {/*<button
-            onClick={() => signOut()}
-            className="mt-4 ml-4 bg-white text-purple-500 font-bold py-1 px-2 rounded hover:bg-opacity-80 transition duration-150 ease-in-out"
-          >
-            Log Out
-      </button>*/}
       <div className="container mx-auto p-4">
         <h1 className="text-white text-4xl font-bold">Check-N-In</h1>
         <p className="text-white mt-4">
