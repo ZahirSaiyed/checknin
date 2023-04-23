@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import Head from 'next/head';
 import { NextPage } from 'next';
 import { useSession, signIn, signOut } from "next-auth/react"
-import { InputData } from '../pages/api/types';
+import { InputData, OutputData } from '../pages/api/types';
+import Header from '../components/Header';
 
 const Home: NextPage = () => {
   const {data : session} = useSession();
@@ -10,8 +11,8 @@ const Home: NextPage = () => {
   const [numberValue, setNumberValue] = useState<number | null>(null);
   const [output, setOutput] = useState('');
   const [apiOutput, setApiOutput] = useState<string>('');
-  const [pastCheckins, setPastCheckins] = useState<InputData[]>([]);
-
+  const [pastCheckins, setPastCheckins] = useState<OutputData[]>([]);
+  
     // Fetch past check-ins when the component mounts
     useEffect(() => {fetchPastCheckins()}, [session]);
 
@@ -54,14 +55,15 @@ const Home: NextPage = () => {
   const callGenerateEndpoint = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    const emptyReplies : [string, string][] = [] 
+
     const inputData = {
       userId: session?.user?.email ?? 'unknown', // assuming the user object has an 'id' field
       text: textValue,
       rating: numberValue || 0,
       timeStamp: new Date(),
+      replies: emptyReplies,
     };
-  
-    await saveUserInput(inputData);
     
     console.log("Calling OpenAI...");
     const response = await fetch('/api/generate', {
@@ -69,14 +71,16 @@ const Home: NextPage = () => {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ userInput: `Mood: ${numberValue}\n`+textValue }),
+      body: JSON.stringify({ userInput: textValue }),
     });
   
     const data = await response.json();
     const { output } = data;
     console.log("OpenAI replied...", output);
+    inputData.replies.push(["Nin",output])
   
     setApiOutput(`${output}`);
+    await saveUserInput(inputData);
   };
   
   const handleSubmit = (e: React.FormEvent) => {
@@ -85,23 +89,21 @@ const Home: NextPage = () => {
   };
   if (!session) {
     return (
-      <div className="min-h-screen bg-gradient-to-r from-purple-500 via-pink-500 to-red-500">
+      <div className="min-h-screen bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 flex flex-col items-center justify-center">
         <Head>
           <title>Check-N-In</title>
         </Head>
-        <div className="container mx-auto p-4">
-          <h1 className="text-white text-4xl font-bold">Check-N-In</h1>
-            <button
-              onClick={() => signIn()}
-              className="mt-4 bg-white text-purple-500 font-bold py-2 px-4 rounded hover:bg-opacity-80 transition duration-150 ease-in-out"
-            >
-              Log In
-            </button>
-          {output && (
-            <div className="mt-8 bg-white bg-opacity-20 text-white p-4 rounded">
-              <p>{output}</p>
-            </div>
-          )}
+        <div className="text-center">
+          <h1 className="text-white text-6xl font-bold">Check-N-In</h1>
+          <p className="text-white text-xl mt-4 mb-8">
+            Track your daily emotions and gain insights.
+          </p>
+          <button
+            onClick={() => signIn()}
+            className="bg-white text-purple-500 font-bold py-2 px-4 rounded hover:bg-opacity-80 transition duration-150 ease-in-out"
+          >
+            Log In
+          </button>
         </div>
       </div>
     )
@@ -111,12 +113,7 @@ const Home: NextPage = () => {
       <Head>
         <title>Check-N-In</title>
       </Head>
-      <button
-            onClick={() => signOut()}
-            className="mt-4 ml-4 bg-white text-purple-500 font-bold py-1 px-2 rounded hover:bg-opacity-80 transition duration-150 ease-in-out"
-          >
-            Log Out
-          </button>
+      <Header />
       <div className="container mx-auto p-4">
         <h1 className="text-white text-4xl font-bold">Check-N-In</h1>
         <p className="text-white mt-4">
@@ -154,32 +151,15 @@ const Home: NextPage = () => {
 
 
 {apiOutput && (
-        <div className="output">
-          <div className="output-header-container">
-            <div className="output-header">
-              <h3>Friend</h3>
-            </div>
+        <div className="output-container">
+          <div className="output-header">
+            <h3>Nin</h3>
           </div>
           <div className="output-content">
             <p>{apiOutput}</p>
           </div>
         </div>
-      )}
-
-{pastCheckins && pastCheckins.length > 0 && (
-  <div className="mt-8">
-    <h2 className="text-white text-2xl font-bold">Past Check-Ins</h2>
-    <ul className="mt-4 space-y-4">
-      {pastCheckins.map((checkin, index) => (
-        <li key={index} className="bg-white bg-opacity-20 text-white p-4 rounded">
-          <p>Date: {new Date(checkin.timeStamp).toLocaleString()}</p>
-          <p>Description: {checkin.text}</p>
-          <p>Rating: {checkin.rating}</p>
-        </li>
-      ))}
-    </ul>
-  </div>
-)}
+  )}
       </div>
     </div>
   );
