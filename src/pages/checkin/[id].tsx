@@ -13,7 +13,6 @@ const CheckIn: NextPage = () => {
     const [thread, setThread] = useState<OutputData>();
     const [textValue, setTextValue] = useState('');
     const chatBottomRef = useRef<HTMLDivElement | null>(null);
-    const refreshThreshold = 10;
 
     useEffect(() => {fetchThread(id?.toString() || null)}, [session, router]);
     useEffect(() => {
@@ -51,7 +50,7 @@ const CheckIn: NextPage = () => {
         setTextValue('');
         scrollToBottom();
         await updateThread(thread);
-        fetch('/api/bot', {
+        await fetch('/api/bot', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -72,7 +71,7 @@ const CheckIn: NextPage = () => {
             },
             body: JSON.stringify({ _id: id}),
           })
-            .then((response) => response.json())
+          .then((response) => response.json())
             .then((data) => {
               if (data.success) {
                 setThread(data.thread[0]);
@@ -110,13 +109,6 @@ const CheckIn: NextPage = () => {
         {AITyping() && (
         <div>
             <p>Nin is typing...</p>
-            <button 
-                className="mt-1 bg-white text-purple-500 font-bold py-2 px-2 rounded hover:bg-opacity-80 transition duration-150 ease-in-out"
-                type="button"
-                onClick={() => fetchThread(id?.toString() || null)}
-            >
-                Refresh
-            </button>
         </div>
         )}
         <div ref={chatBottomRef} />

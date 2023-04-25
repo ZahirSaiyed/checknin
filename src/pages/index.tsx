@@ -41,15 +41,13 @@ const Home: NextPage = () => {
       replies: emptyReplies,
     }; 
     const checkin = await newThread(inputData)
-    // Send thread to bot
-    fetch('/api/bot', {
+    await fetch('/api/bot', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(checkin),
     })
-
     if (checkin._id) router.push(`checkin/${checkin._id}`);
     else setAllowSubmit(true);
   };
