@@ -1,36 +1,40 @@
-// src/pages/api/redeem-invitation.ts
+// redeem-invitation.ts
 import { NextApiRequest, NextApiResponse } from 'next';
 import clientPromise from '../../../lib/mongodb';
 import { ObjectId } from 'bson';
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method === 'POST') {
-    const { userId, invitationId } = req.body;
+    const { invitationId, userId } = req.body;
 
     try {
       const client = await clientPromise;
-      const invitationCollection = client.db("checkins").collection("podInvitations");
-      const podCollection = client.db("checkins").collection("pods");
+      const invitationsCollection = client.db('checkins').collection('podInvitations');
+      const podsCollection = client.db('checkins').collection('pods');
 
-      // Find the invitation
-      const invitation = await invitationCollection.findOne({      _id: new ObjectId(invitationId) });
+      // Find the invitation with the given invitationId
+      const invitation = await invitationsCollection.findOne({ _id: invitationId });
 
-      // Check if the invitation exists and is not expired
-      if (invitation && (!invitation.expiry || invitation.expiry > new Date())) {
-        // Add the user to the pod's members array
-        const updateResult = await podCollection.updateOne(
-          { _id: new ObjectId(invitation.podId) },
-          { $addToSet: { members: new ObjectId(userId) } }
-        );
-
-        if (updateResult.modifiedCount === 1) {
-          res.status(200).json({ success: true });
-        } else {
-          res.status(500).json({ success: false, message: 'Failed to join the pod' });
-        }
-      } else {
-        res.status(400).json({ success: false, message: 'Invalid or expired invitation' });
+      if (!invitation) {
+        res.status(400).json({ success: false, message: 'Invalid invitation link' });
+        return;
       }
+
+      if (invitation.expiry && new Date() > invitation.expiry) {
+        res.status(400).json({ success: false, message: 'Invitation link has expired' });
+        return;
+      }
+
+      // Add the user to the pod's members list
+      await podsCollection.updateOne(
+        { _id: new ObjectId(invitation.podId) },
+        { $addToSet: { members: userId } }
+      );
+
+      // Optionally, delete the used invitation
+      await invitationsCollection.deleteOne({ _id: invitationId });
+
+      res.status(200).json({ success: true, message: 'Invitation redeemed successfully' });
     } catch (error) {
       res.status(500).json({ success: false, message: (error as Error).message });
     }
@@ -38,4 +42,3 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     res.status(405).json({ success: false, message: 'Method not allowed' });
   }
 };
-
