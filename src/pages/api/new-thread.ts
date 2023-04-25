@@ -1,4 +1,4 @@
-// pages/api/save-input.ts
+// pages/api/new-thread.ts
 import { NextApiRequest, NextApiResponse } from 'next';
 import clientPromise from '../../../lib/mongodb';
 import { InputData } from './types'; 
