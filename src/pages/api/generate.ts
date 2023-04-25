@@ -20,18 +20,22 @@ const generateAction = async (req: NextApiRequest, res: NextApiResponse) => {
     }
   })
 
-  const baseCompletion = await openai.createChatCompletion({
-    //for reply in user replies, add reply
-    model: 'gpt-3.5-turbo',
-    messages: messages,
-    temperature: 0.7,
-    max_tokens: 250,
-  });
+  try {
+    const baseCompletion = await openai.createChatCompletion({
+      //for reply in user replies, add reply
+      model: 'gpt-3.5-turbo',
+      messages: messages,
+      temperature: 0.7,
+      max_tokens: 250,
+    });
 
-  const basePromptOutput = baseCompletion.data.choices[0].message?.content;
-  console.log(baseCompletion.data.choices[0].message?.content);
+    const basePromptOutput = baseCompletion.data.choices[0].message?.content;
+    console.log(baseCompletion.data.choices[0].message?.content);
 
-  res.status(200).json({ output: basePromptOutput });
+    res.status(200).json({ success: true, output: basePromptOutput });
+  } catch(error) {
+    res.status(500).json({ success: false, message: (error as Error).message });
+  }
 };
 
 export default generateAction;
