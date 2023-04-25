@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import Head from 'next/head';
 import { NextPage } from 'next';
-import { useSession, signIn, signOut } from "next-auth/react"
-import { InputData, OutputData } from '../pages/api/types';
+import { useSession, signIn } from "next-auth/react"
+import { InputData } from '../pages/api/types';
 import Header from '../components/Header';
 import { useRouter } from 'next/navigation';
 
@@ -21,27 +21,11 @@ const Home: NextPage = () => {
       },
       body: JSON.stringify(inputData),
     });
-  
+    const out = await response.json()
     if (!response.ok) {
-      const error = await response.json();
-      console.error('Error saving input:', error);
+      console.error('Error saving input:', out);
     } 
-    return response.ok
-  };
-
-  const fetchPastCheckins = async () => {
-    if (session) {
-      const response = await fetch("/api/get-checkins", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ userId: session?.user?.email ?? "unknown" }),
-      })
-      if (response.ok) {
-        return (await response.json()).checkins
-      }
-    }
+    return out.checkin
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -56,11 +40,17 @@ const Home: NextPage = () => {
       timeStamp: new Date(),
       replies: emptyReplies,
     }; 
-    if(!await newThread(inputData)) {
-      setAllowSubmit(true);
-    };
-    const checkins = await fetchPastCheckins();
-    if (checkins) router.push(`checkin/${checkins[0]._id}`);
+    const checkin = await newThread(inputData)
+    // Send thread to bot
+    fetch('/api/bot', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(checkin),
+    })
+
+    if (checkin._id) router.push(`checkin/${checkin._id}`);
     else setAllowSubmit(true);
   };
 

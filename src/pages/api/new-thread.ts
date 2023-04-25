@@ -27,9 +27,22 @@ const saveUserInput = async (inputData: InputData): Promise<boolean> => {
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method === 'POST') {
     const inputData = req.body;
+
     try {
-      const result = await saveUserInput(inputData);
-      res.status(200).json({ success: true, result });
+      const result = await saveUserInput(inputData)
+      if (result) {
+      const client = await clientPromise;
+      const collection = client.db("checkins").collection("users");
+
+      const checkin = (await collection
+        .find({ userId: inputData.userId })
+        .sort({ timeStamp: -1 }) // Sort by timeStamp in descending order
+        .toArray())[0];
+
+      res.status(200).json({ success: true, checkin});
+      } else {
+        console.error("MongoDB insertion not acknowledged")
+      }
     } catch (error) {
       res.status(500).json({ success: false, message: (error as Error).message });
     }
@@ -37,3 +50,4 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     res.status(405).json({ success: false, message: 'Method not allowed' });
   }
 };
+

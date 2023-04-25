@@ -1,4 +1,4 @@
-// get-checkins.ts
+// get-thread.ts
 import { NextApiRequest, NextApiResponse } from 'next';
 import clientPromise from '../../../lib/mongodb';
 import { ObjectId } from 'bson';

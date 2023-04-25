@@ -12,11 +12,10 @@ const CheckIn: NextPage = () => {
     const { id } = router.query;
     const [thread, setThread] = useState<OutputData>();
     const [textValue, setTextValue] = useState('');
-    const [isAITyping, setIsAITyping] = useState(false);
     const chatBottomRef = useRef<HTMLDivElement | null>(null);
+    const refreshThreshold = 10;
 
     useEffect(() => {fetchThread(id?.toString() || null)}, [session, router]);
-    //useEffect(() => {setTextValue("@Nin ")}, [thread])
     useEffect(() => {
         scrollToBottom();
     }, [thread?.replies ?? []]);
@@ -26,7 +25,7 @@ const CheckIn: NextPage = () => {
     };
     
 
-    const saveThread = async (thread: OutputData) => {
+    const updateThread = async (thread: OutputData) => {
         const response = await fetch('/api/update-thread', {
           method: 'POST',
           headers: {
@@ -47,36 +46,20 @@ const CheckIn: NextPage = () => {
         }
 
         if (session?.user?.email && thread) {
-        // Show user input immediately
-        thread.replies.push([session.user.email, textValue]);
-
         setThread({ ...thread });
+        thread.replies.push([thread.userId, textValue])
         setTextValue('');
-        setIsAITyping(true); // Set AI typing status to true
         scrollToBottom();
-
-        //console.log("Calling OpenAI...");
-        const response = await fetch('/api/generate', {
+        await updateThread(thread);
+        fetch('/api/bot', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
+              'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ userInput: thread.text, replies: thread.replies }),
-        });
-        const data = await response.json();
-        const { output } = data;
-        //console.log("OpenAI replied...", output);
-
-        // Remove user input from thread replies (it will be added back with AI response)
-        thread.replies.pop();
-
-        // Add both user input and AI response to the thread replies
-        thread.replies.push([session.user.email, textValue], ["Nin", output]);
-
-        await saveThread(thread);
+            body: JSON.stringify(thread),
+          })
         fetchThread(id?.toString() || null);
         scrollToBottom();
-        setIsAITyping(false); // Set AI typing status to false
         }
     }
 
@@ -95,9 +78,10 @@ const CheckIn: NextPage = () => {
                 setThread(data.thread[0]);
               }
             });
-        }
+        }  
     }
 
+    const AITyping = () => (thread?.replies.length == 0 || thread?.replies[thread?.replies.length-1][0] == thread?.userId)
     const isReplyFromAI = (user: string) => user === "Nin";
 
     if (thread && session?.user?.email === thread?.userId) {
@@ -123,11 +107,17 @@ const CheckIn: NextPage = () => {
                 <p> {text}</p>
             </div>
         ))}
-        {isAITyping && (
-            <div className="p-4 rounded bg-blue-400 text-white">
-                <b>Nin</b>
-                <p>...</p>
-            </div>
+        {AITyping() && (
+        <div>
+            <p>Nin is typing...</p>
+            <button 
+                className="mt-1 bg-white text-purple-500 font-bold py-2 px-2 rounded hover:bg-opacity-80 transition duration-150 ease-in-out"
+                type="button"
+                onClick={() => fetchThread(id?.toString() || null)}
+            >
+                Refresh
+            </button>
+        </div>
         )}
         <div ref={chatBottomRef} />
     </div>
@@ -163,6 +153,7 @@ const CheckIn: NextPage = () => {
                         Submit
                     </button>
                 </form>
+                
             </div>
         )
     }  else {
