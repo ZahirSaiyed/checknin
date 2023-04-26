@@ -23,7 +23,7 @@ const RedeemInvitationPage = () => {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            userId: session.user.email, // Get user's ID from session
+            userId: session?.user?.email, // Get user's ID from session
             invitationId,
           }),
         });
