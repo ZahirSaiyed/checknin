@@ -136,6 +136,10 @@ const Home: NextPage = () => {
           >
             Submit
           </button>)}
+          {!allowSubmit && (
+          <p className="mt-4">
+            Submitting...
+          </p>)}
         </form>
         {output && (
           <div className="mt-8 bg-white bg-opacity-20 text-white p-4 rounded">
