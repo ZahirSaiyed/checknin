@@ -64,15 +64,17 @@ const CheckIn: NextPage = () => {
             body: JSON.stringify({ userInput: thread.text, replies: thread.replies }),
         });
         const data = await response.json();
-        const { output } = data;
-        //console.log("OpenAI replied...", output);
 
-        // Remove user input from thread replies (it will be added back with AI response)
-        thread.replies.pop();
+        if (data.success) {
+            const output = data.output;
+            //console.log("OpenAI replied...", output);
 
-        // Add both user input and AI response to the thread replies
-        thread.replies.push([session.user.email, textValue], ["Nin", output]);
+            // Remove user input from thread replies (it will be added back with AI response)
+            thread.replies.pop();
 
+            // Add both user input and AI response to the thread replies
+            thread.replies.push([session.user.email, textValue], ["Nin", output]);
+        }
         await saveThread(thread);
         fetchThread(id?.toString() || null);
         scrollToBottom();
