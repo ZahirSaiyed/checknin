@@ -13,6 +13,7 @@ const CheckIn: NextPage = () => {
     const [thread, setThread] = useState<OutputData>();
     const [textValue, setTextValue] = useState('');
     const [isAITyping, setIsAITyping] = useState(false);
+    const [copied, setCopied] = useState(false);
     const chatBottomRef = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {fetchThread(id?.toString() || null)}, [session, router]);
@@ -100,6 +101,20 @@ const CheckIn: NextPage = () => {
         }
     }
 
+    const handleShare = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (thread) {
+            const data = {
+                title: 'Check-N-In',
+                url: 'https://checknin.up.railway.app/',
+                text: `Check-in: ${thread.rating}\n${thread.text}`
+            }
+            if (navigator.canShare(data)) {
+                navigator.share(data).catch(console.error)
+            }
+        }
+    }
+
     const isReplyFromAI = (user: string) => user === "Nin";
 
     if (thread && session?.user?.email === thread?.userId) {
@@ -110,6 +125,24 @@ const CheckIn: NextPage = () => {
                     <p>{new Date(thread.timeStamp).toLocaleString()}</p>
                     <p>Mood: {thread.rating}</p>
                     <p>{thread.text}</p>
+                    <button
+                        className="mt-4 bg-white text-purple-500 font-bold py-2 px-4 rounded hover:bg-opacity-80 transition duration-150 ease-in-out"
+                        type="submit"
+                        onClick = {(e) => handleShare(e)}
+                    >
+                        Share
+                    </button>
+                    <button
+                        className="ml-4 mt-4 bg-white text-purple-500 font-bold py-2 px-4 rounded hover:bg-opacity-80 transition duration-150 ease-in-out"
+                        type="submit"
+                        onClick = {() => {
+                            navigator.clipboard.writeText(`Check-in: ${thread.rating}\n${thread.text}\n\nFrom https://checknin.up.railway.app/`);
+                            setCopied(true);
+                        }}
+                    >
+                        Copy
+                    </button>
+                    {copied && <p>Copied to clipboard!</p>}
                 </div>
                 <div className="max-w-2xl mx-auto my-6 bg-white bg-opacity-10 rounded-lg h-96 overflow-y-auto space-y-4 p-4">
         {thread?.replies?.map(([user, text], index) => (
