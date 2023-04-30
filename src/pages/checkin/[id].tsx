@@ -13,11 +13,11 @@ const CheckIn: NextPage = () => {
     const [thread, setThread] = useState<OutputData>();
     const [textValue, setTextValue] = useState('');
     const [isAITyping, setIsAITyping] = useState(false);
-    const [copied, setCopied] = useState(false);
     const chatBottomRef = useRef<HTMLDivElement | null>(null);
+    const url = `https://checknin.up.railway.app/checkin/${id}`;
 
     useEffect(() => {fetchThread(id?.toString() || null)}, [session, router]);
-    //useEffect(() => {setTextValue("@Nin ")}, [thread])
+    useEffect(() => {session && thread && (session?.user?.email == thread?.userId) && setTextValue("@Nin ")}, [thread, session])
     useEffect(() => {
         scrollToBottom();
     }, [thread?.replies ?? []]);
@@ -27,17 +27,19 @@ const CheckIn: NextPage = () => {
     };
     
 
-    const saveThread = async (thread: OutputData) => {
+    const saveReply = async (id: String, user: string, text: string, ) => {
         const response = await fetch('/api/update-thread', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(thread),
+          body: JSON.stringify({id, user, text}),
         });
         if (!response.ok) {
           const error = await response.json();
           console.error('Error saving input:', error);
+        } else {
+            fetchThread(id?.toString() || null);
         }
       };
 
@@ -46,40 +48,42 @@ const CheckIn: NextPage = () => {
         if (!textValue.trim()) {
             return;
         }
-
+        console.log("HERE");
         if (session?.user?.email && thread) {
         // Show user input immediately
+        if (!thread.replies) thread.replies = [];
+        console.log("test",thread.replies)
         thread.replies.push([session.user.email, textValue]);
-
-        setThread({ ...thread });
+        await saveReply(id as string, session.user.email, textValue);
         setTextValue('');
-        setIsAITyping(true); // Set AI typing status to true
-        scrollToBottom();
+        setThread({ ...thread });
+        if (textValue.startsWith("@Nin ")) {
+            setTextValue('');
+            setIsAITyping(true); // Set AI typing status to true
+            scrollToBottom();
 
-        //console.log("Calling OpenAI...");
-        const response = await fetch('/api/generate', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ userInput: thread.text, replies: thread.replies }),
-        });
-        const data = await response.json();
+            //console.log("Calling OpenAI...");
+            const response = await fetch('/api/generate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                    userId: session?.user?.email ?? 'unknown', 
+                    userInput: `Mood: ${thread.rating}\n`+thread.text, 
+                    replies: thread.replies
+                }),
+            });
+            const data = await response.json();
 
-        if (data.success) {
-            const output = data.output;
-            //console.log("OpenAI replied...", output);
-
-            // Remove user input from thread replies (it will be added back with AI response)
-            thread.replies.pop();
-
-            // Add both user input and AI response to the thread replies
-            thread.replies.push([session.user.email, textValue], ["Nin", output]);
+            if (data.success) {
+                const output = data.output;
+                thread.replies.push(["Nin", output]);
+                await saveReply(id as string, "Nin", output);
+            setIsAITyping(false); // Set AI typing status to false
+            scrollToBottom();
+            }
         }
-        await saveThread(thread);
-        fetchThread(id?.toString() || null);
-        scrollToBottom();
-        setIsAITyping(false); // Set AI typing status to false
         }
     }
 
@@ -106,8 +110,8 @@ const CheckIn: NextPage = () => {
         if (thread) {
             const data = {
                 title: 'Check-N-In',
-                url: 'https://checknin.up.railway.app/',
-                text: `Check-in: ${thread.rating}\n${thread.text}`
+                url: url,
+                text: `Check out my Check-N-In!`
             }
             if (navigator.canShare(data)) {
                 navigator.share(data).catch(console.error)
@@ -115,51 +119,96 @@ const CheckIn: NextPage = () => {
         }
     }
 
-    const isReplyFromAI = (user: string) => user === "Nin";
+    const replyToUser = (e: React.FormEvent, user: string) => {
+        e.preventDefault();
+        setTextValue(`@${user} `)
+    }
 
-    if (thread && session?.user?.email === thread?.userId) {
+    const toggleLinkAccess = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (thread) {
+            if (thread.linkAccess) {
+                thread.linkAccess = !(thread.linkAccess)
+            } else {
+                thread.linkAccess = true
+            }
+            const response = await fetch('/api/update-access', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({id, linkAccess: thread.linkAccess}),
+              });
+              if (!response.ok) {
+                const error = await response.json();
+                console.error('Error saving input:', error);
+              } else {
+                  fetchThread(id?.toString() || null);
+              }
+        }
+    }
+
+    const isReplyFromOP = (user: string) => user === thread?.userId;
+
+    if (session && thread && ((session?.user?.email === thread.userId) || thread.linkAccess)) {
         return (
             <div className="min-h-screen bg-gradient-to-r from-purple-500 via-pink-500 to-red-500">
                 <Header />
                 <div className="bg-white bg-opacity-20 text-white p-4 rounded max-w-2xl mx-auto my-6"> 
+                <div>
                     <p>{new Date(thread.timeStamp).toLocaleString()}</p>
                     <p>Mood: {thread.rating}</p>
                     <p>{thread.text}</p>
-                    <button
-                        className="mt-4 bg-white text-purple-500 font-bold py-2 px-4 rounded hover:bg-opacity-80 transition duration-150 ease-in-out"
-                        type="submit"
-                        onClick = {(e) => handleShare(e)}
-                    >
-                        Share
-                    </button>
+                </div>
+                {session?.user?.email === thread.userId && 
+                <div className="p-1 rounded flex justify-between items-center">
+                <div className="p-1 rounded flex items-center">
+                    {thread.linkAccess && 
+                    <p> Link Sharing is ON</p>}
+                    {!thread.linkAccess && 
+                    <p> Link Sharing is OFF</p>}
                     <button
                         className="ml-4 mt-4 bg-white text-purple-500 font-bold py-2 px-4 rounded hover:bg-opacity-80 transition duration-150 ease-in-out"
                         type="submit"
-                        onClick = {() => {
-                            navigator.clipboard.writeText(`Check-in: ${thread.rating}\n${thread.text}\n\nFrom https://checknin.up.railway.app/`);
-                            setCopied(true);
-                        }}
+                        onClick = {(e) => {toggleLinkAccess(e)}}
                     >
-                        Copy
+                        Toggle
                     </button>
-                    {copied && <p>Copied to clipboard!</p>}
+                </div>
+                {thread.linkAccess && 
+                    <button
+                    className="mt-4 bg-white text-purple-500 font-bold py-2 px-4 rounded hover:bg-opacity-80 transition duration-150 ease-in-out"
+                    type="submit"
+                    onClick = {(e) => handleShare(e)}
+                >
+                    Share
+                </button>}
+                </div>}
                 </div>
                 <div className="max-w-2xl mx-auto my-6 bg-white bg-opacity-10 rounded-lg h-96 overflow-y-auto space-y-4 p-4">
         {thread?.replies?.map(([user, text], index) => (
             <div
                 key={index}
-                className={`p-4 rounded ${
-                    isReplyFromAI(user)
+                className={`p-4 rounded flex justify-between items-center ${
+                    isReplyFromOP(user)
                     ? "bg-blue-400 text-white"
                     : "bg-gray-200 text-gray-800"
                 }`}
             >
+                <div>
                 <b>{user}</b>
                 <p> {text}</p>
+                </div>
+                <button
+                        className="ml-4 mt-4 bg-white text-purple-500 font-bold py-2 px-4 rounded hover:bg-opacity-80 transition duration-150 ease-in-out"
+                        onClick = {(e) => replyToUser(e, user)}
+                    >
+                        Reply
+                </button>
             </div>
         ))}
         {isAITyping && (
-            <div className="p-4 rounded bg-blue-400 text-white">
+            <div className="p-4 rounded bg-gray-200 text-gray-800">
                 <b>Nin</b>
                 <p>...</p>
             </div>

@@ -5,6 +5,7 @@ export type InputData = {
     rating: number;
     timeStamp: Date;
     replies: [string, string][];
+    linkAccess: boolean;
   };  
 
   export type OutputData = {
@@ -14,4 +15,5 @@ export type InputData = {
     rating: number;
     timeStamp: Date;
     replies: [string, string][];
+    linkAccess: boolean;
   };  
