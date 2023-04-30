@@ -7,16 +7,16 @@ const configuration = new Configuration({
 
 const openai = new OpenAIApi(configuration);
 
-const basePromptPrefix = "Act like a really good friend who is empathetic, positive, caring, and is always uplifting. Respond to the user's recap of their day";
+const basePromptPrefix = "You are the bot 'Nin' on the website Check-N-In. Act like a really good friend who is empathetic, positive, caring, and is always uplifting. Respond to the user's recap of their day which includes a 1-10 rating of their mood. Any replies not written by you are prefixed by their username followed by a colon and a newline.";
 
 const generateAction = async (req: NextApiRequest, res: NextApiResponse) => {
 
-  const messages : Array<ChatCompletionRequestMessage> = [{role: "system", content: basePromptPrefix},{role: "user", content: req.body.userInput}];
+  const messages : Array<ChatCompletionRequestMessage> = [{role: "system", content: basePromptPrefix},{role: "user", content: `${req.body.userId}:\n`+req.body.userInput}];
   req.body.replies?.forEach( ([user,reply]: [string,string]) => {
     if (user=="Nin") {
-      messages.push({role: "system", content: reply})
+      messages.push({role: "assistant", content: reply})
     } else {
-      messages.push({role: "user", content: reply})
+      messages.push({role: "user", content: `${user}:\n`+reply})
     }
   })
 

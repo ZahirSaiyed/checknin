@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import Head from 'next/head';
 import { NextPage } from 'next';
-import { useSession, signIn, signOut } from "next-auth/react"
+import { useSession, signIn } from "next-auth/react"
 import { InputData, OutputData } from '../pages/api/types';
 import Header from '../components/Header';
 import { useRouter } from 'next/navigation';
@@ -11,8 +11,6 @@ const Home: NextPage = () => {
   const router = useRouter()
   const [textValue, setTextValue] = useState('');
   const [numberValue, setNumberValue] = useState<number | null>(null);
-  const [output, setOutput] = useState('');
-  const [apiOutput, setApiOutput] = useState<string>('');
   const [allowSubmit, setAllowSubmit] = useState<boolean>(true);
 
   const fetchPastCheckins = async () => {
@@ -58,23 +56,22 @@ const Home: NextPage = () => {
       rating: numberValue || 0,
       timeStamp: new Date(),
       replies: emptyReplies,
+      linkAccess: false,
     };
-    
+
     console.log("Calling OpenAI...");
     const response = await fetch('/api/generate', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ userInput: textValue }),
+      body: JSON.stringify({ userId: session?.user?.email ?? 'unknown', userInput: `Mood: ${numberValue}\n`+textValue }),
     });
   
     const data = await response.json();
     const output = data.output;
     console.log("OpenAI replied...", output);
     inputData.replies.push(["Nin",output])
-  
-    setApiOutput(`${output}`);
     const checkin = (await saveUserInput(inputData)) as OutputData;
     if (checkin._id) router.push(`checkin/${checkin._id}`);
     else setAllowSubmit(true);
@@ -141,11 +138,6 @@ const Home: NextPage = () => {
             Submitting...
           </p>)}
         </form>
-        {output && (
-          <div className="mt-8 bg-white bg-opacity-20 text-white p-4 rounded">
-            <p>{output}</p>
-          </div>
-        )}
       </div>
     </div>
   );

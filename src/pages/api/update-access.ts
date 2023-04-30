@@ -1,24 +1,15 @@
-// pages/api/save-input.ts
+// pages/api/update-access.ts
 import { NextApiRequest, NextApiResponse } from 'next';
 import clientPromise from '../../../lib/mongodb';
 import { ObjectId } from 'bson';
 
-const updateThread = async (id: string, user: string, text: string): Promise<boolean> => {
+const updateAccess = async (id: string, linkAccess: boolean): Promise<boolean> => {
   try {
         const client = await clientPromise;
         const collection = client.db("checkins").collection("users");
         const filter = { _id: new ObjectId(id) }
-        const threadReplies = (await collection.find({ _id: new ObjectId(id) }).toArray())[0]
-        if (!threadReplies.linkAccess && user != "Nin" && user != threadReplies.userId) return true
-        if (threadReplies.replies) {
-          threadReplies.replies.push([user, text])
-          const result = await collection.updateOne(filter, {$set: {replies: threadReplies.replies}});
-          return result.acknowledged
-        } else {
-          const replies: [string,string][]  = [[user,text]]
-          const result = await collection.updateOne(filter, {$set: {replies: replies}});
-          return result.acknowledged
-        }
+        const result = await collection.updateOne(filter, {$set: {linkAccess: linkAccess}});
+        return result.acknowledged
       } catch (error) {
         console.error("Error inserting data into MongoDB:", error);
         return false;
@@ -28,9 +19,9 @@ const updateThread = async (id: string, user: string, text: string): Promise<boo
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method === 'POST') {
     console.log('Saving user input:', req.body)
-    const {id, user, text} = req.body;
+    const {id, linkAccess} = req.body;
     try {
-      const result = await updateThread(id,user,text);
+      const result = await updateAccess(id,linkAccess);
       res.status(200).json({ success: true, result });
     } catch (error) {
       res.status(500).json({ success: false, message: (error as Error).message });
