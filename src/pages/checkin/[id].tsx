@@ -2,9 +2,10 @@ import { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import { useState, useEffect, useRef} from 'react';
 import { OutputData } from '../../pages/api/types';
-import { useSession } from "next-auth/react";
+import { useSession, signIn } from "next-auth/react";
 import Link from 'next/link';
 import Header from '../../components/Header';
+import Head from 'next/head';
 
 const CheckIn: NextPage = () => {
     const {data : session} = useSession();
@@ -249,7 +250,26 @@ const CheckIn: NextPage = () => {
                 </form>
             </div>
         )
-    }  else {
+    }  else if (!session) {
+        return (
+            <div className="min-h-screen bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 flex flex-col items-center justify-center">
+              <Head>
+                <title>Check-N-In</title>
+              </Head>
+              <div className="text-center">
+                <h1 className="text-white text-6xl font-bold">Check-N-In</h1>
+                <p className="text-white text-xl mt-4 mb-8">
+                  Track your daily emotions and gain insights.
+                </p>
+                <button
+                  onClick={() => signIn()}
+                  className="bg-white text-purple-500 font-bold py-2 px-4 rounded hover:bg-opacity-80 transition duration-150 ease-in-out"
+                >
+                  Log In
+                </button>
+              </div>
+            </div>)
+    } else {
         return (
         <div className="min-h-screen bg-gradient-to-r from-purple-500 via-pink-500 to-red-500">
             <p>Improper permissions</p>
