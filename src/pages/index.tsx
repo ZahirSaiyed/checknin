@@ -110,7 +110,7 @@ const Home: NextPage = () => {
           How was your day today? Rate your day out of 10
         </p>
         <form onSubmit={(e) => {if (allowSubmit) {setAllowSubmit(false); callGenerateEndpoint(e)}}} className="mt-8">
-          <input
+          <textarea
             className="block w-full bg-white bg-opacity-20 text-white placeholder-white placeholder-opacity-50 border border-white border-opacity-20 rounded p-2 focus:outline-none focus:border-white"
             type="text"
             placeholder="Enter text here"
