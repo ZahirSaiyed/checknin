@@ -110,21 +110,20 @@ const Home: NextPage = () => {
           How was your day today? Rate your day out of 10
         </p>
         <form onSubmit={(e) => {if (allowSubmit) {setAllowSubmit(false); callGenerateEndpoint(e)}}} className="mt-8">
-          <textarea
-            className="block w-full bg-white bg-opacity-20 text-white placeholder-white placeholder-opacity-50 border border-white border-opacity-20 rounded p-2 focus:outline-none focus:border-white"
-            type="text"
-            placeholder="Enter text here"
-            value={textValue}
-            onChange={(e) => setTextValue(e.target.value)}
-          />
           <input
-            className="block w-full bg-white bg-opacity-20 text-white placeholder-white placeholder-opacity-50 border border-white border-opacity-20 rounded p-2 focus:outline-none focus:border-white mt-4"
+            className="block w-full bg-white bg-opacity-20 text-white placeholder-white placeholder-opacity-50 border border-white border-opacity-20 rounded p-2 focus:outline-none focus:border-white mt-4 mb-4"
             type="number"
             min="1"
             max="10"
             step="0.01"
             placeholder="Enter a number between 1 and 10"
             onChange={(e) => setNumberValue(parseFloat(e.target.value))}
+          />
+          <textarea
+            className="block w-full bg-white bg-opacity-20 text-white placeholder-white placeholder-opacity-50 border border-white border-opacity-20 rounded p-2 focus:outline-none focus:border-white"
+            placeholder="Enter text here"
+            value={textValue}
+            onChange={(e) => setTextValue(e.target.value)}
           />
           {allowSubmit && (
           <button
