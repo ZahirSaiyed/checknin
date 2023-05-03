@@ -15,9 +15,9 @@ const Header = () => {
           <button className="text-white font-bold hover:underline focus:outline-none">Past Checkins</button>
         </Link>
 
-        {/* <Link href="/pods" passHref>
+        <Link href="/pods" passHref>
           <button className="text-white font-bold hover:underline focus:outline-none">Pods</button>
-        </Link> */}
+        </Link>
       </nav>
 
       <div className="justify-self-end">
