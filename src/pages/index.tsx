@@ -27,6 +27,25 @@ const Home: NextPage = () => {
     }
   }
 
+  async function getAccount(email: string) {
+    const response = await fetch('/api/get-account', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            email: email
+        }),
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        console.error('Error saving input:', error);
+        return;
+    } 
+    const data = await response.json();
+    return data.username
+}
+
   const saveUserInput = async (inputData: InputData) => {
     const response = await fetch('/api/save-input', {
       method: 'POST',
@@ -65,7 +84,7 @@ const Home: NextPage = () => {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ userId: session?.user?.email ?? 'unknown', userInput: `Mood: ${numberValue}\n`+textValue }),
+      body: JSON.stringify({ userId: await getAccount(session?.user?.email as string) ?? 'unknown', userInput: `Mood: ${numberValue}\n`+textValue }),
     });
   
     const data = await response.json();
