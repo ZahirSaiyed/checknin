@@ -14,6 +14,7 @@ const CheckIn: NextPage = () => {
     const [thread, setThread] = useState<OutputData>();
     const [textValue, setTextValue] = useState('');
     const [isAITyping, setIsAITyping] = useState(false);
+    const [usernames, setUsernames] = useState<{ [email: string]: string }>({});
     const chatBottomRef = useRef<HTMLDivElement | null>(null);
     const url = `https://checknin.up.railway.app/checkin/${id}`;
 
@@ -23,18 +24,41 @@ const CheckIn: NextPage = () => {
         scrollToBottom();
     }, [thread?.replies ?? []]);
 
+    useEffect(() => {(session?.user?.email && getAccount(session.user.email))}, [session]);
+
+    async function getAccount(email: string) {
+        if(usernames[email]) return usernames[email];
+        const response = await fetch('/api/get-account', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                email: email
+            }),
+        });
+        if (!response.ok) {
+            const error = await response.json();
+            console.error('Error saving input:', error);
+            return;
+        } 
+        const data = await response.json();
+        usernames[email] = data.username;
+        setUsernames(usernames);
+    }
+
     const scrollToBottom = () => {
         chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
     
 
-    const saveReply = async (id: String, user: string, text: string, ) => {
+    const saveReply = async (id: String, user: string, owner: string, text: string, ) => {
         const response = await fetch('/api/update-thread', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({id, user, text}),
+          body: JSON.stringify({id, user, owner, text}),
         });
         if (!response.ok) {
           const error = await response.json();
@@ -49,13 +73,13 @@ const CheckIn: NextPage = () => {
         if (!textValue.trim()) {
             return;
         }
-        console.log("HERE");
         if (session?.user?.email && thread) {
         // Show user input immediately
         if (!thread.replies) thread.replies = [];
-        console.log("test",thread.replies)
-        thread.replies.push([session.user.email, textValue]);
-        await saveReply(id as string, session.user.email, textValue);
+        const username = (await getAccount(session.user.email)) as string
+        const owner = (await getAccount(thread.userId)) as string
+        thread.replies.push([username, textValue]);
+        await saveReply(id as string, username, owner, textValue);
         setTextValue('');
         setThread({ ...thread });
         if (textValue.startsWith("@Nin ")) {
@@ -70,7 +94,7 @@ const CheckIn: NextPage = () => {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({ 
-                    userId: session?.user?.email ?? 'unknown', 
+                    userId: await getAccount(session?.user?.email) ?? 'unknown', 
                     userInput: `Mood: ${thread.rating}\n`+thread.text, 
                     replies: thread.replies
                 }),
@@ -80,7 +104,7 @@ const CheckIn: NextPage = () => {
             if (data.success) {
                 const output = data.output;
                 thread.replies.push(["Nin", output]);
-                await saveReply(id as string, "Nin", output);
+                await saveReply(id as string, "Nin", owner, output);
             setIsAITyping(false); // Set AI typing status to false
             scrollToBottom();
             }
@@ -149,7 +173,10 @@ const CheckIn: NextPage = () => {
         }
     }
 
-    const isReplyFromOP = (user: string) => user === thread?.userId;
+    const isReplyFromOP = (user: string) => {
+        const email = thread?.userId
+        return (user === usernames[email as string])
+    }
 
     if (session && thread && ((session?.user?.email === thread.userId) || thread.linkAccess)) {
         return (
