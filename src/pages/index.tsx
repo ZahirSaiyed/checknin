@@ -82,6 +82,7 @@ const Home: NextPage = () => {
       <div className="min-h-screen bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 flex flex-col items-center justify-center">
         <Head>
           <title>Check-N-In</title>
+          <link rel="shortcut icon" href="../../public/logo.png"/>
         </Head>
         <div className="text-center">
           <h1 className="text-white text-6xl font-bold">Check-N-In</h1>
@@ -100,9 +101,6 @@ const Home: NextPage = () => {
   }
   return (
     <div className="min-h-screen bg-gradient-to-r from-purple-500 via-pink-500 to-red-500">
-      <Head>
-        <title>Check-N-In</title>
-      </Head>
       <Header />
       <div className="container mx-auto p-4">
         <h1 className="text-white text-4xl font-bold">Check-N-In</h1>
