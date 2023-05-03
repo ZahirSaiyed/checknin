@@ -34,8 +34,9 @@ const Header = () => {
         <title>Check-N-In</title>
       </Head>
       <nav className="flex items-center space-x-4">
-        <Link href="/" passHref>
-          <button className="text-white font-bold hover:underline focus:outline-none">Home</button>
+        <Link href="/" passHref className="flex">
+          <img className="rounded-full h-8" src="/favicon.png" alt=""/>
+          <button className="ml-4 text-white font-bold hover:underline focus:outline-none">Home</button>
         </Link>
 
         <Link href="/past-checkins" passHref>
