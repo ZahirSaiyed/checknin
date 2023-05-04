@@ -180,7 +180,6 @@ const CheckIn: NextPage = () => {
     }
 
     function getName (user: string) {
-        console.log(usernames, user, usernames[user])
         return usernames[user]
     }
 
