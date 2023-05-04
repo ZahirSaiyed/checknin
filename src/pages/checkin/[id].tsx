@@ -15,6 +15,8 @@ const CheckIn: NextPage = () => {
     const [textValue, setTextValue] = useState('');
     const [isAITyping, setIsAITyping] = useState(false);
     const [usernames, setUsernames] = useState<{ [email: string]: string }>({});
+    const [feedback, setFeedback] = useState<boolean>(Math.random() < 0.1)
+    const [feedbackValue, setFeedbackValue] = useState('');
     const chatBottomRef = useRef<HTMLDivElement | null>(null);
     const url = `https://checknin.up.railway.app/checkin/${id}`;
 
@@ -179,8 +181,46 @@ const CheckIn: NextPage = () => {
         return (user === usernames[email as string])
     }
 
+    function submitFeedback(e: React.FormEvent) {
+        fetch('/api/send-feedback', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({text: feedbackValue}),
+          })
+        setFeedback(false);
+    }
+    
     function getName (user: string) {
         return usernames[user]
+    }
+
+    if (feedback && session) {
+        return(
+            <div className="min-h-screen bg-gradient-to-r from-purple-500 via-pink-500 to-red-500">
+            <Header />
+            <div className="container mx-auto p-4">
+              <h1 className="text-white text-4xl font-bold">Check-N-In</h1>
+              <form onSubmit={(e) => {submitFeedback(e)}} className="mt-8">
+              <p className="text-white mt-4">
+                Please take some time to give us your feedback!
+              </p>
+                <textarea
+                  className="block w-full bg-white bg-opacity-20 text-white placeholder-white placeholder-opacity-50 border border-white border-opacity-20 rounded p-2 focus:outline-none focus:border-white mt-4 mb-4"
+                  placeholder="I think..."
+                  value={feedbackValue}
+                  onChange={(e) => setFeedbackValue(e.target.value)}
+                />
+                <button
+                    className="mt-4 bg-white text-purple-500 font-bold py-2 px-4 rounded hover:bg-opacity-80 transition duration-150 ease-in-out"
+                    type="submit"
+                >
+                    Submit
+                </button>
+              </form>
+            </div>
+          </div>)
     }
 
     if (session && thread && ((session?.user?.email === thread.userId) || thread.linkAccess)) {
