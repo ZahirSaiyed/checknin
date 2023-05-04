@@ -19,8 +19,14 @@ const CheckIn: NextPage = () => {
     const url = `https://checknin.up.railway.app/checkin/${id}`;
 
     useEffect(() => {fetchThread(id?.toString() || null)}, [session, router]);
-    useEffect(() => {session && thread && (session?.user?.email == thread?.userId) && setTextValue("@Nin ")}, [thread, session])
+    useEffect(() => {session && thread && (session?.user?.email == thread?.userId) && textValue == '' && setTextValue("@Nin ")}, [thread, session])
     useEffect(() => {(session?.user?.email && getAccount(session.user.email))}, [session]);
+    useEffect(() => {
+        const interval = setInterval(() => {
+            fetchThread(id?.toString() || null); // Reload the current page
+        }, 5000); // Refresh every 5 seconds
+        return () => clearInterval(interval); // Cleanup function
+      }, []);
 
     async function getAccount(email: string) {
         if(usernames[email]) return usernames[email];
