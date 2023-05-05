@@ -4,7 +4,7 @@ import { NextPage } from 'next';
 import { useSession, signIn } from "next-auth/react"
 import { InputData, OutputData } from '../pages/api/types';
 import Header from '../components/Header';
-import { useRouter } from 'next/navigation';
+import { useRouter } from 'next/router';
 
 const Home: NextPage = () => {
   const {data : session} = useSession();
@@ -63,7 +63,6 @@ const Home: NextPage = () => {
     }
   };
 
-
   const callGenerateEndpoint = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -75,24 +74,36 @@ const Home: NextPage = () => {
       rating: numberValue || 0,
       timeStamp: new Date(),
       replies: emptyReplies,
-      linkAccess: false,
+      linkAccess: router.query.pod ? true : false,
+      pod: (router.query.pod as string) ?? "",
     };
 
-    console.log("Calling OpenAI...");
-    const response = await fetch('/api/generate', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ userId: await getAccount(session?.user?.email as string) ?? 'unknown', userInput: `Mood: ${numberValue}\n`+textValue }),
-    });
-  
-    const data = await response.json();
-    const output = data.output;
-    console.log("OpenAI replied...", output);
-    inputData.replies.push(["Nin",output])
+    if (inputData.pod == "") {
+      console.log("Calling OpenAI...");
+      const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId: await getAccount(session?.user?.email as string) ?? 'unknown', userInput: `Mood: ${numberValue}\n`+textValue }),
+      });
+    
+      const data = await response.json();
+      const output = data.output;
+      console.log("OpenAI replied...", output);
+      inputData.replies.push(["Nin",output])
+    } else {
+      fetch('/api/add-pod', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId: inputData.userId, pod: inputData.pod }),
+      })
+    }
     const checkin = (await saveUserInput(inputData)) as OutputData;
-    if (checkin._id) router.push(`checkin/${checkin._id}`);
+    if (inputData.pod != "") router.push(`pod/${inputData.pod}`)
+    else if (checkin._id) router.push(`checkin/${checkin._id}`);
     else setAllowSubmit(true);
   };
 
@@ -145,6 +156,7 @@ const Home: NextPage = () => {
             value={textValue}
             onChange={(e) => setTextValue(e.target.value)}
           />
+          <div className="flex">
           {allowSubmit && (
           <button
             className="mt-4 bg-white text-purple-500 font-bold py-2 px-4 rounded hover:bg-opacity-80 transition duration-150 ease-in-out"
@@ -156,6 +168,10 @@ const Home: NextPage = () => {
           <p className="mt-4">
             Submitting...
           </p>)}
+          {router.query.pod && 
+          <p className="ml-2 mt-6 text-white">Posting to pod</p>
+          }
+          </div>
         </form>
       </div>
     </div>
