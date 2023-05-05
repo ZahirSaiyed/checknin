@@ -13,14 +13,16 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 
       const accountCollection = client.db("checkins").collection("accounts");
       const oldPods = (await accountCollection.find({ userId }).toArray())[0].pods
-      if (oldPods) {
-        oldPods.push([name,pod])
-        const result = await accountCollection.updateMany({userId }, {$set: { pods: oldPods}})
-        res.status(200).json({ success: result.acknowledged })
-      } else {
-        const result = await accountCollection.updateMany({userId }, {$set: { pods: [[name,pod]]}});
-        res.status(200).json({ success: result.acknowledged })
-      }
+      if (!oldPods || !oldPods.includes([name,pod])) {
+        if (oldPods) {
+          oldPods.push([name,pod])
+          const result = await accountCollection.updateMany({userId }, {$set: { pods: oldPods}})
+          res.status(200).json({ success: result.acknowledged })
+        } else {
+          const result = await accountCollection.updateMany({userId }, {$set: { pods: [[name,pod]]}});
+          res.status(200).json({ success: result.acknowledged })
+        }
+    }
     } catch (error) {
       res.status(500).json({ success: false, message: (error as Error).message });
     }
