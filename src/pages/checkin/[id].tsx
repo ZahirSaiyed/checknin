@@ -21,7 +21,7 @@ const CheckIn: NextPage = () => {
     const url = `https://checknin.up.railway.app/checkin/${id}`;
 
     useEffect(() => {fetchThread(id?.toString() || null)}, [session, router]);
-    useEffect(() => {session && thread && (session?.user?.email == thread?.userId) && textValue == '' && setTextValue("@Nin ")}, [thread, session])
+    useEffect(() => {session && thread && (session?.user?.email == thread?.userId) && textValue == '' && (!thread.pod || thread.pod == '') && setTextValue("@Nin ")}, [thread, session])
     useEffect(() => {(session?.user?.email && getAccount(session.user.email))}, [session]);
     useEffect(() => {
         const interval = setInterval(() => {
@@ -227,7 +227,7 @@ const CheckIn: NextPage = () => {
         return (
             <div className="min-h-screen bg-gradient-to-r from-purple-500 via-pink-500 to-red-500">
                 <Header />
-                {session?.user?.email === thread.userId ?
+                {(session?.user?.email === thread.userId) && thread.pod == ""  ?
                 <div className="mx-auto p-1 rounded flex justify-center items-center">
                     {thread.linkAccess && 
                     <p> Link Sharing is ON</p>}
