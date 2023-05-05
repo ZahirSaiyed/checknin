@@ -2,7 +2,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import clientPromise from '../../../lib/mongodb';
 
-const updateAccess = async (email: string, username: string, list: boolean): Promise<boolean> => {
+const updateAccount = async (email: string, username: string, list: boolean): Promise<boolean> => {
   try {
         const client = await clientPromise;
         const collection = client.db("checkins").collection("accounts");
@@ -20,7 +20,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     console.log('Saving user input:', req.body)
     const {email, username, list} = req.body;
     try {
-      const result = await updateAccess(email, username, list);
+      const result = await updateAccount(email, username, list);
       res.status(200).json({ success: true, result });
     } catch (error) {
       res.status(500).json({ success: false, message: (error as Error).message });

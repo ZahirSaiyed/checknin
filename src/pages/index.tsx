@@ -76,6 +76,7 @@ const Home: NextPage = () => {
       timeStamp: new Date(),
       replies: emptyReplies,
       linkAccess: false,
+      pod: "",
     };
 
     console.log("Calling OpenAI...");
