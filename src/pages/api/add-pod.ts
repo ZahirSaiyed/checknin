@@ -13,7 +13,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 
       const accountCollection = client.db("checkins").collection("accounts");
       const oldPods = (await accountCollection.find({ userId }).toArray())[0].pods
-      if (!oldPods || !oldPods.includes([name,pod])) {
+      if (!oldPods || !oldPods.map((tuple: [string,string]) => tuple[1]).includes(pod)) {
         if (oldPods) {
           oldPods.push([name,pod])
           const result = await accountCollection.updateMany({userId }, {$set: { pods: oldPods}})
@@ -22,7 +22,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
           const result = await accountCollection.updateMany({userId }, {$set: { pods: [[name,pod]]}});
           res.status(200).json({ success: result.acknowledged })
         }
-    }
+    } res.status(200).json({ success: true })
     } catch (error) {
       res.status(500).json({ success: false, message: (error as Error).message });
     }
