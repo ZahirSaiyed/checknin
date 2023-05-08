@@ -346,7 +346,7 @@ const CheckIn: NextPage = () => {
                 </button>
               </div>
             </div>)
-    } else {
+    } else if (thread) {
         return (
         <div className="min-h-screen bg-gradient-to-r from-purple-500 via-pink-500 to-red-500">
             <p>Improper permissions</p>
@@ -359,6 +359,10 @@ const CheckIn: NextPage = () => {
             </Link>
         </div>
         )
+    } else {
+        return (<div className="min-h-screen bg-gradient-to-r from-purple-500 via-pink-500 to-red-500">
+            <Header />
+        </div>)
     }
 }
 
