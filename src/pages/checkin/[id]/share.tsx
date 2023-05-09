@@ -80,7 +80,7 @@ const CheckIn: NextPage = () => {
                 headers: {
                   'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({id, user: textValue}),
+                body: JSON.stringify({collection: "users", id, user: textValue}),
               });
               setTextValue("");
               if (!response.ok) {

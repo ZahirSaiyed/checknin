@@ -93,12 +93,12 @@ const PodShare: NextPage = () => {
         }
     }
 
-    if (session && thread && (!thread.pod || thread.pod == "") && session?.user?.email === thread.userId) {
+    if (session && pod && session?.user?.email === pod.userId) {
         return (
             <div className="min-h-screen bg-gradient-to-r from-purple-500 via-pink-500 to-red-500">
                 <Header />
                 <div className="mx-auto p-1 rounded flex justify-center items-center">
-                    {<p> Access: {thread.linkAccess ? "Public" : "Private"}</p>}
+                    {<p> Access: {pod.linkAccess ? "Public" : "Private"}</p>}
                     <button
                         className="ml-4 bg-white text-purple-500 font-bold py-2 px-4 rounded hover:bg-opacity-80 transition duration-150 ease-in-out"
                         type="submit"
@@ -109,13 +109,13 @@ const PodShare: NextPage = () => {
                     <button
                         className="ml-4 bg-white text-purple-500 font-bold py-2 px-4 rounded hover:bg-opacity-80 transition duration-150 ease-in-out"
                         type="submit"
-                        onClick = {() => router.push(`/checkin/${id}/view`)}
+                        onClick = {() => router.push(`/pod/${id}/view`)}
                     >
                         Back
                 </button>
                 </div>
                 <div className="mx-auto p-1 rounded flex justify-center items-center">
-                <p> {thread.linkAccess 
+                <p> {pod.linkAccess 
                 ? "Anyone with link can access" 
                 : "Listed users with link can access"}
                 </p>
@@ -127,9 +127,9 @@ const PodShare: NextPage = () => {
                     Share Link
                 </button>
                 </div>
-                {!thread.linkAccess && 
+                {!pod.linkAccess && 
                 <div className="max-w-2xl mx-auto bg-white bg-opacity-10 rounded-lg space-y-4 p-4">
-        {thread?.shared?.map((user, index) => (
+        {pod?.shared?.map((user, index) => (
             <div
                 key={index}
                 className="bg-white bg-opacity-20 text-white p-1 rounded max-w-2xl mx-auto my-1"
@@ -177,7 +177,7 @@ const PodShare: NextPage = () => {
                 </button>
               </div>
             </div>)
-    } else if (thread) {
+    } else if (pod) {
         return (
         <div className="min-h-screen bg-gradient-to-r from-purple-500 via-pink-500 to-red-500">
             <p>Improper permissions</p>
