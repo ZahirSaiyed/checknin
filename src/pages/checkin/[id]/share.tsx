@@ -92,7 +92,7 @@ const CheckIn: NextPage = () => {
         }
     }
 
-    if (session && thread && thread.pod == "" && session?.user?.email === thread.userId) {
+    if (session && thread && (!thread.pod || thread.pod == "") && session?.user?.email === thread.userId) {
         return (
             <div className="min-h-screen bg-gradient-to-r from-purple-500 via-pink-500 to-red-500">
                 <Header />
