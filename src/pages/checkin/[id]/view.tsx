@@ -1,10 +1,10 @@
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import { useState, useEffect, useRef} from 'react';
-import { OutputData } from '../../pages/api/types';
+import { OutputData } from '../../api/types';
 import { useSession, signIn } from "next-auth/react";
 import Link from 'next/link';
-import Header from '../../components/Header';
+import Header from '../../../components/Header';
 import Head from 'next/head';
 
 const CheckIn: NextPage = () => {
@@ -18,7 +18,7 @@ const CheckIn: NextPage = () => {
     const [feedback, setFeedback] = useState<boolean>(Math.random() < 0.1)
     const [feedbackValue, setFeedbackValue] = useState('');
     const chatBottomRef = useRef<HTMLDivElement | null>(null);
-    const url = `https://checknin.up.railway.app/checkin/${id}`;
+    const url = `https://checknin.up.railway.app/checkin/${id}/view`;
 
     useEffect(() => {fetchThread(id?.toString() || null)}, [session, router]);
     useEffect(() => {session && thread && (session?.user?.email == thread?.userId) && textValue == '' && (!thread.pod || thread.pod == '') && setTextValue("@Nin ")}, [thread, session])
@@ -229,25 +229,14 @@ const CheckIn: NextPage = () => {
                 <Header />
                 {(session?.user?.email === thread.userId) && thread.pod == ""  ?
                 <div className="mx-auto p-1 rounded flex justify-center items-center">
-                    {thread.linkAccess && 
-                    <p> Link Sharing is ON</p>}
-                    {!thread.linkAccess && 
-                    <p> Link Sharing is OFF</p>}
-                    <button
-                        className="ml-4 bg-white text-purple-500 font-bold py-2 px-4 rounded hover:bg-opacity-80 transition duration-150 ease-in-out"
-                        type="submit"
-                        onClick = {(e) => {toggleLinkAccess(e)}}
-                    >
-                        Toggle
-                    </button>
-                    {thread.linkAccess && 
+                    <p> Access: {thread.linkAccess ? "Public" : "Private"}</p>
                     <button
                     className="ml-4 bg-white text-purple-500 font-bold py-2 px-4 rounded hover:bg-opacity-80 transition duration-150 ease-in-out"
                     type="submit"
-                    onClick = {(e) => handleShare(e)}
+                    onClick = {() => router.push(`/checkin/${id}/share`)}
                 >
                     Share
-                </button>}
+                </button>
                 </div>
                 : 
                 <div className="mx-auto p-1 rounded flex justify-center items-center">
