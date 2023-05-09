@@ -102,7 +102,7 @@ const Home: NextPage = () => {
       })
     }
     const checkin = (await saveUserInput(inputData)) as OutputData;
-    if (inputData.pod != "") router.push(`pod/${inputData.pod}`)
+    if (inputData.pod != "") router.push(`pod/${inputData.pod}/view`)
     else if (checkin._id) router.push(`checkin/${checkin._id}`);
     else setAllowSubmit(true);
   };

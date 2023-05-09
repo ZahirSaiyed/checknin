@@ -2,11 +2,11 @@ import { useEffect, useState } from "react";
 import { NextPage } from "next";
 import { useRouter } from 'next/router';
 import { useSession } from "next-auth/react";
-import { OutputData } from "../api/types";
-import Header from "../../components/Header";
+import { OutputData } from "../../api/types";
+import Header from "../../../components/Header";
 import Link from 'next/link';
 
-const PastCheckins: NextPage = () => {
+const PodView: NextPage = () => {
   const { data: session } = useSession();
   const router = useRouter();
   const [pastCheckins, setPastCheckins] = useState<OutputData[]>([]);
@@ -128,4 +128,4 @@ const PastCheckins: NextPage = () => {
   );
 };
 
-export default PastCheckins;
+export default PodView;

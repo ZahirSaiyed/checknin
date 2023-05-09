@@ -24,4 +24,6 @@ export type Pod = {
   _id: string;
   userId: string;
   name: string;
+  linkAccess: boolean;
+  shared: string[];
 };  

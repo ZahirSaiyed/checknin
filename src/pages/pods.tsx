@@ -54,8 +54,9 @@ const PastCheckins: NextPage = () => {
 
   async function createPod(e: React.FormEvent)  {
     e.preventDefault();
+    if (textValue != "") return;
     const podId = (await saveNewPod(textValue));
-    if (podId) router.push(`pod/${podId}`);
+    if (podId) router.push(`pod/${podId}/view`);
     else setAllowSubmit(true);
   }
 
@@ -85,7 +86,7 @@ const PastCheckins: NextPage = () => {
 </div>
         <ul className="mt-4 space-y-6">
           {pods.map(([podName,podId], index) => (
-            <Link href={`pod/${podId}`} key={index}>
+            <Link href={`pod/${podId}/view`} key={index}>
                 <li className="bg-white bg-opacity-20 text-white p-5 rounded hover:bg-opacity-30 cursor-pointer transition duration-150 ease-in-out shadow-lg">
                 <div className="flex justify-between items-center">
                     <div>
