@@ -76,6 +76,7 @@ const Home: NextPage = () => {
       replies: emptyReplies,
       linkAccess: router.query.pod ? true : false,
       pod: (router.query.pod as string) ?? "",
+      shared: [],
     };
 
     if (inputData.pod == "") {

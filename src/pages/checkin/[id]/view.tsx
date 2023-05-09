@@ -18,7 +18,6 @@ const CheckIn: NextPage = () => {
     const [feedback, setFeedback] = useState<boolean>(Math.random() < 0.1)
     const [feedbackValue, setFeedbackValue] = useState('');
     const chatBottomRef = useRef<HTMLDivElement | null>(null);
-    const url = `https://checknin.up.railway.app/checkin/${id}/view`;
 
     useEffect(() => {fetchThread(id?.toString() || null)}, [session, router]);
     useEffect(() => {session && thread && (session?.user?.email == thread?.userId) && textValue == '' && (!thread.pod || thread.pod == '') && setTextValue("@Nin ")}, [thread, session])
@@ -54,14 +53,18 @@ const CheckIn: NextPage = () => {
         chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
     
+    const replyToUser = (e: React.FormEvent, user: string) => {
+        e.preventDefault();
+        setTextValue(`@${user} `)
+    }
 
-    const saveReply = async (id: String, user: string, owner: string, text: string, ) => {
+    const saveReply = async (id: String, user: string, userId: string, text: string, ) => {
         const response = await fetch('/api/update-thread', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({id, user, owner, text}),
+          body: JSON.stringify({id, user, userId, ownerId: thread?.userId, text}),
         });
         if (!response.ok) {
           const error = await response.json();
@@ -82,7 +85,7 @@ const CheckIn: NextPage = () => {
         const username = (await getAccount(session.user.email)) as string
         const owner = (await getAccount(thread.userId)) as string
         thread.replies.push([username, textValue]);
-        await saveReply(id as string, username, owner, textValue);
+        await saveReply(id as string, username, session.user.email, textValue);
         setTextValue('');
         setThread({ ...thread });
         if (textValue.startsWith("@Nin ")) {
@@ -106,7 +109,7 @@ const CheckIn: NextPage = () => {
             if (data.success) {
                 const output = data.output;
                 thread.replies.push(["Nin", output]);
-                await saveReply(id as string, "Nin", owner, output);
+                await saveReply(id as string, "Nin", "Nin", output);
             setIsAITyping(false); // Set AI typing status to false
             }
         }
@@ -133,49 +136,6 @@ const CheckIn: NextPage = () => {
         }
     }
 
-    const handleShare = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (thread) {
-            const data = {
-                title: 'Check-N-In',
-                url: url,
-                text: `Check out my Check-N-In!`
-            }
-            if (navigator.canShare(data)) {
-                navigator.share(data).catch(console.error)
-            }
-        }
-    }
-
-    const replyToUser = (e: React.FormEvent, user: string) => {
-        e.preventDefault();
-        setTextValue(`@${user} `)
-    }
-
-    const toggleLinkAccess = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (thread) {
-            if (thread.linkAccess) {
-                thread.linkAccess = !(thread.linkAccess)
-            } else {
-                thread.linkAccess = true
-            }
-            const response = await fetch('/api/update-access', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({id, linkAccess: thread.linkAccess}),
-              });
-              if (!response.ok) {
-                const error = await response.json();
-                console.error('Error saving input:', error);
-              } else {
-                  fetchThread(id?.toString() || null);
-              }
-        }
-    }
-
     const isReplyFromOP = (user: string) => {
         const email = thread?.userId
         return (user === usernames[email as string])
@@ -194,6 +154,12 @@ const CheckIn: NextPage = () => {
     
     function getName (user: string) {
         return usernames[user]
+    }
+
+    function canAccess() {
+        return session && thread && ((session?.user?.email === thread?.userId) 
+        || thread.linkAccess
+        || thread.shared?.includes(session?.user?.email as string))
     }
 
     if (feedback && session) {
@@ -223,7 +189,7 @@ const CheckIn: NextPage = () => {
           </div>)
     }
 
-    if (session && thread && ((session?.user?.email === thread.userId) || thread.linkAccess)) {
+    if (session && thread && canAccess()) {
         return (
             <div className="min-h-screen bg-gradient-to-r from-purple-500 via-pink-500 to-red-500">
                 <Header />
@@ -335,7 +301,7 @@ const CheckIn: NextPage = () => {
                 </button>
               </div>
             </div>)
-    } else {
+    } else if (thread) {
         return (
         <div className="min-h-screen bg-gradient-to-r from-purple-500 via-pink-500 to-red-500">
             <p>Improper permissions</p>
@@ -348,6 +314,10 @@ const CheckIn: NextPage = () => {
             </Link>
         </div>
         )
+    } else {
+        return (<div className="min-h-screen bg-gradient-to-r from-purple-500 via-pink-500 to-red-500">
+        <Header />
+        </div>)
     }
 }
 
