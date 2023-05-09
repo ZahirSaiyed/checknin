@@ -13,8 +13,22 @@ const PastCheckins: NextPage = () => {
   const { id } = router.query;
   const [usernames, setUsernames] = useState<{ [email: string]: string }>({});
   const url = `../?pod=${id}`
-
+  const [podName, setPodName] = useState("");
+  
+  useEffect(() => {getPodName(id as string)}, [router]);
   useEffect(() => {fetchPastCheckins()}, [session]);
+
+  async function getPodName(podId: string) {
+    const response = await fetch('/api/get-pod-name', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ pod: podId }),
+    });
+    const data = await response.json();
+    setPodName(data.name);
+  }
 
   async function getAccount(email: string) {
     if(usernames[email]) return usernames[email];
@@ -88,7 +102,7 @@ const PastCheckins: NextPage = () => {
                     Post
         </button>
         </div>
-        <h1 className="text-white text-4xl font-bold mb-1">Pod Checkins</h1>
+        <h1 className="text-white text-4xl font-bold mb-1">{podName}</h1>
         <div className="flex justify-end mb-4">
 </div>
         <ul className="space-y-6">
