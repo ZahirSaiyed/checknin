@@ -9,7 +9,7 @@ import { Pod } from '../pages/api/types';
 const PastCheckins: NextPage = () => {
   const router = useRouter()
   const { data: session } = useSession();
-  const [pods, setPods] = useState<[string,string][]>([]);
+  const [pods, setPods] = useState<Pod[]>([]);
   const [textValue, setTextValue] = useState('');
   const [allowSubmit, setAllowSubmit] = useState<boolean>(true);
 
@@ -19,18 +19,17 @@ const PastCheckins: NextPage = () => {
 
   const fetchPods = () => {
     if (session) {
-      fetch("/api/get-account", {
+      fetch("/api/get-pods", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email: session?.user?.email ?? "unknown" }),
+        body: JSON.stringify({ email: session?.user?.email }),
       })
         .then((response) => response.json())
         .then((data) => {
           if (data.success) {
-            console.log(data)
-            setPods(data.pods ? data.pods : []);
+            setPods(data.pods);
           }
         });
     }
@@ -85,12 +84,12 @@ const PastCheckins: NextPage = () => {
         <div className="flex justify-end mb-4">
 </div>
         <ul className="mt-4 space-y-6">
-          {pods.map(([podName,podId], index) => (
-            <Link href={`pod/${podId}/view`} key={index}>
+          {pods.map((pod, index) => (
+            <Link href={`pod/${pod._id}/view`} key={index}>
                 <li className="bg-white bg-opacity-20 text-white p-5 rounded hover:bg-opacity-30 cursor-pointer transition duration-150 ease-in-out shadow-lg">
                 <div className="flex justify-between items-center">
                     <div>
-                      <p className="text-lg font-semibold">{podName}</p>
+                      <p className="text-lg font-semibold">{pod.name}</p>
                     </div>
                   </div>
                 </li>

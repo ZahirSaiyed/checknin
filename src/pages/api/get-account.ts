@@ -18,8 +18,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
             res.status(200).json({ 
                 success: true, 
                 username: email, 
-                list: false,
-                pods: []});
+                list: false});
         } else {
             res.status(200).json({ success: true, result });
         }
@@ -30,8 +29,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         res.status(200).json({ 
             success: true, 
             username: account[0].username, 
-            list: account[0].list, 
-            pods: account[0].pods ?? []});
+            list: account[0].list});
       }
     } catch (error) {
       res.status(500).json({ success: false, message: (error as Error).message });

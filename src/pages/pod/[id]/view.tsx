@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { NextPage } from "next";
 import { useRouter } from 'next/router';
-import { useSession } from "next-auth/react";
+import { useSession, signIn } from "next-auth/react";
 import { OutputData, Pod } from "../../api/types";
 import Header from "../../../components/Header";
 import Link from 'next/link';
+import Head from 'next/head';
 
 const PodView: NextPage = () => {
   const { data: session } = useSession();
@@ -81,6 +82,13 @@ const PodView: NextPage = () => {
     }
     }   
 
+  function canAccess() {
+    return session && pod && ((session?.user?.email === pod?.userId) 
+    || pod.linkAccess
+    || pod.shared?.includes(session?.user?.email as string))
+  }
+
+  if (session && pod && canAccess()) {
   return (
     <div className="min-h-screen bg-gradient-to-r from-purple-500 via-pink-500 to-red-500">
       <Header />
@@ -132,7 +140,43 @@ const PodView: NextPage = () => {
         </ul>
       </div>
     </div>
-  );
-};
+  )} else if (!pod) {
+    return (
+        <div className="min-h-screen bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 flex flex-col items-center justify-center">
+          <Head>
+            <title>Check-N-In</title>
+          </Head>
+          <div className="text-center">
+            <h1 className="text-white text-6xl font-bold">Check-N-In</h1>
+            <p className="text-white text-xl mt-4 mb-8">
+              Track your daily emotions and gain insights.
+            </p>
+            <button
+              onClick={() => signIn()}
+              className="bg-white text-purple-500 font-bold py-2 px-4 rounded hover:bg-opacity-80 transition duration-150 ease-in-out"
+            >
+              Log In
+            </button>
+          </div>
+        </div>)
+} else if (pod) {
+  return (
+  <div className="min-h-screen bg-gradient-to-r from-purple-500 via-pink-500 to-red-500">
+      <p>Improper permissions</p>
+      <Link href={`/`}>
+      <button
+          className="mt-4 ml-4 bg-white text-purple-500 font-bold py-1 px-2 rounded hover:bg-opacity-80 transition duration-150 ease-in-out"
+      >
+          Go back
+      </button>
+      </Link>
+  </div>
+  )
+} else {
+  return (<div className="min-h-screen bg-gradient-to-r from-purple-500 via-pink-500 to-red-500">
+  <Header />
+  </div>)
+}
+}
 
 export default PodView;

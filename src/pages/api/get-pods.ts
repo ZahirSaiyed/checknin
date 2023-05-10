@@ -1,18 +1,18 @@
-// pages/api/add-pod.ts
+// get-pods.ts
 import { NextApiRequest, NextApiResponse } from 'next';
 import clientPromise from '../../../lib/mongodb';
-import { ObjectId } from 'bson';
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method === 'POST') {
-    const {userId, pod} = req.body;
+    const email = req.body.email;
+
     try {
       const client = await clientPromise;
       const collection = client.db("checkins").collection("pods");
-      const podMembers = (await collection.find({ _id: new ObjectId(pod) }).toArray())[0].shared ?? [pod.userId]
-      podMembers.push(userId)
-      const result = await collection.updateMany({userId }, {$set: { shared: podMembers}})
-      res.status(200).json({ success: result.acknowledged })
+      const pods = await collection
+        .find({$or: [{shared: { $all: [email] }}, {userId: email}]})
+        .toArray();
+      res.status(200).json({ success: true, pods });
     } catch (error) {
       res.status(500).json({ success: false, message: (error as Error).message });
     }
