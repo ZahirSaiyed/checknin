@@ -53,7 +53,10 @@ const PastCheckins: NextPage = () => {
 
   async function createPod(e: React.FormEvent)  {
     e.preventDefault();
-    if (textValue != "") return;
+    if (textValue == "") {
+      setAllowSubmit(true);
+      return;
+    }
     const podId = (await saveNewPod(textValue));
     if (podId) router.push(`pod/${podId}/view`);
     else setAllowSubmit(true);

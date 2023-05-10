@@ -10,7 +10,10 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       const client = await clientPromise;
       const collection = client.db("checkins").collection("pods");
       const podMembers = (await collection.find({ _id: new ObjectId(pod) }).toArray())[0].shared ?? [pod.userId]
-      podMembers.push(userId)
+      if (!podMembers.contains(userId)) {
+        podMembers.push(userId)
+      }
+      console.log("HI",podMembers)
       const result = await collection.updateMany({userId }, {$set: { shared: podMembers}})
       res.status(200).json({ success: result.acknowledged })
     } catch (error) {

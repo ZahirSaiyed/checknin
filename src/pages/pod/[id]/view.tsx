@@ -13,7 +13,7 @@ const PodView: NextPage = () => {
   const [pastCheckins, setPastCheckins] = useState<OutputData[]>([]);
   const { id } = router.query;
   const [usernames, setUsernames] = useState<{ [email: string]: string }>({});
-  const url = `../?pod=${id}`
+  const url = `../../?pod=${id}`
   const [pod, setPod] = useState<Pod>();
   
   useEffect(() => {getPodName(router.query.id as string)}, [router]);
@@ -122,7 +122,7 @@ const PodView: NextPage = () => {
 </div>
         <ul className="space-y-6">
           {pastCheckins.map((checkin, index) => (
-            <Link href={`../checkin/${checkin._id}/view`} key={index}>
+            <Link href={`../../checkin/${checkin._id}/view`} key={index}>
                 <li className="bg-white bg-opacity-20 text-white p-5 rounded hover:bg-opacity-30 cursor-pointer transition duration-150 ease-in-out shadow-lg">
                 <div className="flex justify-between items-center">
                     <div>
