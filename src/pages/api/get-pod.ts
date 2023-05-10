@@ -11,11 +11,11 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       const client = await clientPromise;
       const collection = client.db("checkins").collection("pods");
 
-      const pod = await collection
+      const pod = (await collection
         .find({ _id: new ObjectId(_id) })
-        .toArray();
+        .toArray())[0];
 
-      res.status(200).json({ success: true, thread: pod });
+      res.status(200).json({ success: true, pod });
     } catch (error) {
       res.status(500).json({ success: false, message: (error as Error).message });
     }

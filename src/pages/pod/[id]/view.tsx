@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { NextPage } from "next";
 import { useRouter } from 'next/router';
 import { useSession } from "next-auth/react";
-import { OutputData } from "../../api/types";
+import { OutputData, Pod } from "../../api/types";
 import Header from "../../../components/Header";
 import Link from 'next/link';
 
@@ -13,21 +13,21 @@ const PodView: NextPage = () => {
   const { id } = router.query;
   const [usernames, setUsernames] = useState<{ [email: string]: string }>({});
   const url = `../?pod=${id}`
-  const [podName, setPodName] = useState("");
+  const [pod, setPod] = useState<Pod>();
   
-  useEffect(() => {getPodName(id as string)}, [router]);
+  useEffect(() => {getPodName(router.query.id as string)}, [router]);
   useEffect(() => {fetchPastCheckins()}, [session]);
 
   async function getPodName(podId: string) {
-    const response = await fetch('/api/get-pod-name', {
+    const response = await fetch('/api/get-pod', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ pod: podId }),
+      body: JSON.stringify({ _id: podId }),
     });
     const data = await response.json();
-    setPodName(data.name);
+    setPod(data.pod);
   }
 
   async function getAccount(email: string) {
@@ -87,13 +87,13 @@ const PodView: NextPage = () => {
       <div className="container mx-auto p-4">
 
         <div className="mx-auto p-1 rounded flex justify-center items-center mb-4">
-        <button
+        {pod?.linkAccess && <button
                     className="ml-4 bg-white text-purple-500 font-bold py-2 px-4 rounded hover:bg-opacity-80 transition duration-150 ease-in-out"
                     type="submit"
                     onClick = {(e) => handleShare(e)}
                 >
                     Invite
-        </button>
+        </button>}
         <button
                     className="ml-4 bg-white text-purple-500 font-bold py-2 px-4 rounded hover:bg-opacity-80 transition duration-150 ease-in-out"
                     type="submit"
@@ -101,8 +101,15 @@ const PodView: NextPage = () => {
                 >
                     Post
         </button>
+        {pod && session?.user?.email == pod.userId && <button
+                    className="ml-4 bg-white text-purple-500 font-bold py-2 px-4 rounded hover:bg-opacity-80 transition duration-150 ease-in-out"
+                    type="submit"
+                    onClick = {() => router.push(`/pod/${id}/share`)}
+                >
+                    Share
+        </button>}
         </div>
-        <h1 className="text-white text-4xl font-bold mb-1">{podName}</h1>
+        <h1 className="text-white text-4xl font-bold mb-1">{pod?.name}</h1>
         <div className="flex justify-end mb-4">
 </div>
         <ul className="space-y-6">

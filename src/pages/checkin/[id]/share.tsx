@@ -61,7 +61,7 @@ const CheckIn: NextPage = () => {
                 headers: {
                   'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({id, linkAccess: thread.linkAccess}),
+                body: JSON.stringify({collection: "users", id, linkAccess: thread.linkAccess}),
               });
               if (!response.ok) {
                 const error = await response.json();

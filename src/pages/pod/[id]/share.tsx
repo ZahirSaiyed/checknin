@@ -29,7 +29,7 @@ const PodShare: NextPage = () => {
             .then((response) => response.json())
             .then((data) => {
               if (data.success) {
-                setPod(data.pod[0]);
+                setPod(data.pod);
               }
             });
         }
