@@ -10,7 +10,10 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       const client = await clientPromise;
       const collection = client.db("checkins").collection("pods");
       const pods = await collection
-        .find({$or: [{shared: { $all: [email] }}, {userId: email}]})
+        .find({$or: [
+          {$and: [{shared: {$exists: true} },{shared: { $all: [email] }}]}, 
+          {userId: email}
+        ]})
         .toArray();
       res.status(200).json({ success: true, pods });
     } catch (error) {

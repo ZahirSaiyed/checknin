@@ -4,18 +4,80 @@ import { useSession } from "next-auth/react";
 import Header from "../components/Header";
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Pod } from '../pages/api/types';
+import { Account, Pod } from '../pages/api/types';
 
 const PastCheckins: NextPage = () => {
   const router = useRouter()
   const { data: session } = useSession();
   const [pods, setPods] = useState<Pod[]>([]);
+  const [podNotifs, setPodNotifs] = useState<number[]>()
   const [textValue, setTextValue] = useState('');
   const [allowSubmit, setAllowSubmit] = useState<boolean>(true);
+  const [account, setAccount] = useState<Account>();
 
   useEffect(() => {
-    fetchPods();
+    fetchPods()
+    getAccount()
   }, [session]);
+
+  useEffect(() => {
+    getCheckinNotifs();
+  }, [account,pods]);
+
+  async function getAccount() {
+    const response = await fetch('/api/get-account', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            email: session?.user?.email
+        }),
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        console.error('Error saving input:', error);
+        return;
+    } 
+    const data = await response.json();
+    setAccount(data.account);
+  }
+
+  async function getCheckinNotifs() {
+    if(account && pods) {
+      var notifs = []
+      for (var pod of pods) {
+        var checkins = await getPodCheckins(pod._id)
+        var accountNum = 0
+        var podNum = 0
+        for (var checkin of checkins) {
+          podNum += 1+(checkin.replies?.length ?? 0)
+          accountNum += account.notifs ? (account.notifs[checkin._id] ?? 0) : 0
+        }
+        notifs.push(podNum-accountNum)
+      }
+      setPodNotifs(notifs)
+    }
+  }
+
+  async function getPodCheckins(pod: string) {
+    const response = await fetch('/api/get-pod-checkins', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            pod
+        }),
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        console.error('Error saving input:', error);
+        return;
+    } 
+    const data = await response.json();
+    return data.checkins;
+  }
 
   const fetchPods = () => {
     if (session) {
@@ -91,8 +153,13 @@ const PastCheckins: NextPage = () => {
             <Link href={`pod/${pod._id}/view`} key={index}>
                 <li className="bg-white bg-opacity-20 text-white p-5 rounded hover:bg-opacity-30 cursor-pointer transition duration-150 ease-in-out shadow-lg">
                 <div className="flex justify-between items-center">
-                    <div>
+                    <div className="flex">
                       <p className="text-lg font-semibold">{pod.name}</p>
+                      {podNotifs && podNotifs[index]>0 && (
+                        <span className="h-4 w-4 bg-red-500 text-white text-xs flex items-center justify-center rounded-full">
+                          {podNotifs[index]}
+                        </span>
+                      )}
                     </div>
                   </div>
                 </li>

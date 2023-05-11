@@ -20,6 +20,7 @@ const CheckIn: NextPage = () => {
     const [feedbackValue, setFeedbackValue] = useState('');
     const chatBottomRef = useRef<HTMLDivElement | null>(null);
 
+    useEffect(() => {thread && session && updateNotifs()}, [thread, session]);
     useEffect(() => {thread && thread.pod && fetchPod(thread.pod)}, [thread, session]);
     useEffect(() => {fetchThread(id?.toString() || null)}, [session, router]);
     useEffect(() => {session && thread && (session?.user?.email == thread?.userId) && textValue == '' && (!thread.pod || thread.pod == '') && setTextValue("@Nin ")}, [thread, session])
@@ -62,7 +63,7 @@ const CheckIn: NextPage = () => {
             return;
         } 
         const data = await response.json();
-        setUsernames(prevState => ({ ...prevState, [email]: data.username }))
+        setUsernames(prevState => ({ ...prevState, [email]: data.account.username }))
     }
 
     const scrollToBottom = () => {
@@ -87,6 +88,22 @@ const CheckIn: NextPage = () => {
           console.error('Error saving input:', error);
         } else {
             fetchThread(id?.toString() || null);
+        }
+      };
+
+    const updateNotifs = async () => {
+        if(thread?.replies) {
+            const response = await fetch('/api/update-notifs', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({id, userId: session?.user?.email, notifs: 1+thread.replies.length}),
+            });
+            if (!response.ok) {
+            const error = await response.json();
+            console.error('Error saving input:', error);
+            }
         }
       };
 

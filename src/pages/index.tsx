@@ -43,7 +43,7 @@ const Home: NextPage = () => {
         return;
     } 
     const data = await response.json();
-    return data.username
+    return data.account.username
 }
 
   const saveUserInput = async (inputData: InputData) => {

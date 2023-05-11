@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { NextPage } from "next";
 import { useRouter } from 'next/router';
 import { useSession, signIn } from "next-auth/react";
-import { OutputData, Pod } from "../../api/types";
+import { OutputData, Pod, Account } from "../../api/types";
 import Header from "../../../components/Header";
 import Link from 'next/link';
 import Head from 'next/head';
@@ -15,9 +15,29 @@ const PodView: NextPage = () => {
   const [usernames, setUsernames] = useState<{ [email: string]: string }>({});
   const url = `../../?pod=${id}`
   const [pod, setPod] = useState<Pod>();
+  const [account, setAccount] = useState<Account>();
   
   useEffect(() => {getPodName(router.query.id as string)}, [router]);
-  useEffect(() => {fetchPastCheckins()}, [session]);
+  useEffect(() => {fetchPastCheckins(); getUserAccount()}, [session]);
+
+  async function getUserAccount() {
+    const response = await fetch('/api/get-account', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            email: session?.user?.email
+        }),
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        console.error('Error saving input:', error);
+        return;
+    } 
+    const data = await response.json();
+    setAccount(data.account);
+  }
 
   async function getPodName(podId: string) {
     const response = await fetch('/api/get-pod', {
@@ -48,7 +68,7 @@ const PodView: NextPage = () => {
         return;
     } 
     const data = await response.json();
-    setUsernames(prevState => ({ ...prevState, [email]: data.username }))
+    setUsernames(prevState => ({ ...prevState, [email]: data.account.username }))
 }
 
   const fetchPastCheckins = () => {
@@ -126,7 +146,14 @@ const PodView: NextPage = () => {
                 <li className="bg-white bg-opacity-20 text-white p-5 rounded hover:bg-opacity-30 cursor-pointer transition duration-150 ease-in-out shadow-lg">
                 <div className="flex justify-between items-center">
                     <div>
+                      <div className="flex">
                       <p className="text-lg font-semibold">{usernames[checkin.userId]}</p>
+                      {account && (1+checkin.replies.length-(account.notifs ? (account.notifs[checkin._id] ?? 0) : 0))>0 && (
+                        <span className="h-4 w-4 bg-red-500 text-white text-xs flex items-center justify-center rounded-full">
+                          {1+checkin.replies.length-(account.notifs ? (account.notifs[checkin._id] ?? 0) : 0)}
+                        </span>
+                      )}
+                      </div>
                       <p className="text-sm">{new Date(checkin.timeStamp).toLocaleDateString()}</p>
                     </div>
                     <div className="flex items-center">

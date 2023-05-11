@@ -13,12 +13,17 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         .find({ userId: email })
         .toArray())
       if (account.length==0) {
-        const result = await collection.insertOne({ userId: email, username: email, list: false})
+        const newAccount = { 
+          userId: email, 
+          username: email, 
+          list: false,
+          notifs: {}
+        }
+        const result = await collection.insertOne(newAccount)
         if (result.acknowledged) {
             res.status(200).json({ 
                 success: true, 
-                username: email, 
-                list: false});
+                account: newAccount});
         } else {
             res.status(200).json({ success: true, result });
         }
@@ -28,8 +33,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         }
         res.status(200).json({ 
             success: true, 
-            username: account[0].username, 
-            list: account[0].list});
+            account: account[0]});
       }
     } catch (error) {
       res.status(500).json({ success: false, message: (error as Error).message });
