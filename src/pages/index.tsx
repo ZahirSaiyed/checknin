@@ -93,6 +93,7 @@ const Home: NextPage = () => {
       replies: emptyReplies,
       linkAccess: router.query.pod ? true : false,
       pod: (router.query.pod as string) ?? "",
+      shared: [],
     };
     setNumberValue(null);
     if (inputData.pod == "") {
@@ -120,7 +121,8 @@ const Home: NextPage = () => {
     const checkin = (await saveUserInput(inputData)) as OutputData;
     setSubmitting(false);
     if (inputData.pod != "") router.push(`pod/${inputData.pod}`)
-    else if (checkin._id) router.push(`checkin/${checkin._id}`);
+    else if (checkin._id) router.push(`checkin/${checkin._id}/view`);
+    else setAllowSubmit(true);
   };
 
   if (!session) {
