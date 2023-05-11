@@ -38,9 +38,9 @@ const CheckIn: NextPage = () => {
         e.preventDefault();
         if (thread) {
             const data = {
-                title: 'Check-N-In',
+                title: "respond to my checkin bruh",
                 url: url,
-                text: `Check out my Check-N-In!`
+                text: "respond to my checkin bruh"
             }
             if (navigator.canShare(data)) {
                 navigator.share(data).catch(console.error)
