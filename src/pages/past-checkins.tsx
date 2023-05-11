@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { NextPage } from "next";
 import { useSession } from "next-auth/react";
-import { OutputData } from "./api/types";
+import { OutputData, Account } from "./api/types";
 import Header from "../components/Header";
 import RatingChart from "../components/RatingChart";
 import Link from 'next/link';
@@ -31,6 +31,7 @@ const PastCheckins: NextPage = () => {
   const { data: session } = useSession();
   const [pastCheckins, setPastCheckins] = useState<OutputData[]>([]);
   const [filter, setFilter] = useState({ type: "date", order: "desc" });
+  const [account, setAccount] = useState<Account>();
 
   const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const [type, order] = e.target.value.split("-");
@@ -49,8 +50,27 @@ const PastCheckins: NextPage = () => {
     }
   });
 
+  async function getUserAccount() {
+    const response = await fetch('/api/get-account', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            email: session?.user?.email
+        }),
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        console.error('Error saving input:', error);
+        return;
+    } 
+    const data = await response.json();
+    setAccount(data.account);
+  }
+
   useEffect(() => {
-    fetchPastCheckins();
+    fetchPastCheckins(); getUserAccount()
   }, [session]);
 
   const fetchPastCheckins = () => {
@@ -87,11 +107,18 @@ const PastCheckins: NextPage = () => {
         )}
         <ul className="mt-4 space-y-6">
           {sortedCheckins.map((checkin, index) => (
-            <Link href={`checkin/${checkin._id}`} key={index}>
+            <Link href={`checkin/${checkin._id}/view`} key={index}>
                 <li className="bg-white bg-opacity-20 text-white p-5 rounded hover:bg-opacity-30 cursor-pointer transition duration-150 ease-in-out shadow-lg">
                 <div className="flex justify-between items-center">
                     <div>
+                      <div className="flex">
                       <p className="text-lg font-semibold">{checkin.text}</p>
+                      {account && checkin.replies && (1+checkin.replies.length-(account.notifs ? (account.notifs[checkin._id] ?? 0) : 0))>0 && (
+                        <span className="h-4 w-4 bg-red-500 text-white text-xs flex items-center justify-center rounded-full">
+                          {1+checkin.replies.length-(account.notifs ? (account.notifs[checkin._id] ?? 0) : 0)}
+                        </span>
+                      )}
+                      </div>
                       <p className="text-sm">{new Date(checkin.timeStamp).toLocaleDateString()}</p>
                     </div>
                     <div className="flex items-center">

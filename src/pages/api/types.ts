@@ -6,6 +6,7 @@ export type InputData = {
     timeStamp: Date;
     replies: [string, string][];
     linkAccess: boolean;
+    shared: string[];
     pod: string;
   };  
 
@@ -17,6 +18,7 @@ export type OutputData = {
   timeStamp: Date;
   replies: [string, string][];
   linkAccess: boolean;
+  shared: string[];
   pod: string;
 };  
 
@@ -24,4 +26,13 @@ export type Pod = {
   _id: string;
   userId: string;
   name: string;
+  linkAccess: boolean;
+  shared: string[];
 };  
+
+export type Account = {
+  _id: string;
+  username: string, 
+  list: boolean,
+  notifs: {[id: string]: number}
+}

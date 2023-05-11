@@ -27,8 +27,8 @@ const PastCheckins: NextPage = () => {
             return;
         } 
         const data = await response.json();
-        setIsChecked(data.list);
-        setTextValue(data.username);
+        setIsChecked(data.account.list);
+        setTextValue(data.account.username);
     }
 
     async function updateAccount(checked: boolean) {

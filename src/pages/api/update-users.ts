@@ -1,15 +1,23 @@
-// pages/api/update-access.ts
+// pages/api/update-users.ts
 import { NextApiRequest, NextApiResponse } from 'next';
 import clientPromise from '../../../lib/mongodb';
 import { ObjectId } from 'bson';
 
-const updateAccess = async (collectionName: string, id: string, linkAccess: boolean): Promise<boolean> => {
+const updateUsers = async (collectionName: string, id: string, user: string): Promise<boolean> => {
   try {
         const client = await clientPromise;
         const collection = client.db("checkins").collection(collectionName);
         const filter = { _id: new ObjectId(id) }
-        const result = await collection.updateOne(filter, {$set: {linkAccess: linkAccess}});
-        return result.acknowledged
+        const thread = (await collection.find({ _id: new ObjectId(id) }).toArray())[0]
+        if (thread.shared) {
+          thread.shared.push(user)
+          const result = await collection.updateOne(filter, {$set: {shared: thread.shared}});
+          return result.acknowledged
+        } else {
+          const shared: string[]  = [user]
+          const result = await collection.updateOne(filter, {$set: {shared}});
+          return result.acknowledged
+        }
       } catch (error) {
         console.error("Error inserting data into MongoDB:", error);
         return false;
@@ -19,9 +27,9 @@ const updateAccess = async (collectionName: string, id: string, linkAccess: bool
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method === 'POST') {
     console.log('Saving user input:', req.body)
-    const {collection, id, linkAccess} = req.body;
+    const {collection, id, user } = req.body;
     try {
-      const result = await updateAccess(collection,id,linkAccess);
+      const result = await updateUsers(collection, id, user);
       res.status(200).json({ success: true, result });
     } catch (error) {
       res.status(500).json({ success: false, message: (error as Error).message });
