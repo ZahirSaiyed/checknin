@@ -11,6 +11,8 @@ const Home: NextPage = () => {
   const router = useRouter()
   const [textValue, setTextValue] = useState("");
   const [numberValue, setNumberValue] = useState<number | null>(null);
+
+  const [ninResponse, setNinResponse] = useState<boolean>(router.query.pod ? false : true);
   const [allowSubmit, setAllowSubmit] = useState<boolean>(false);
   const [podName, setPodName] = useState("");
   const [submitting, setSubmitting] = useState<boolean>(false);
@@ -96,7 +98,7 @@ const Home: NextPage = () => {
       shared: [],
     };
     setNumberValue(null);
-    if (inputData.pod == "") {
+    if (ninResponse) {
       console.log("Calling OpenAI...");
       const response = await fetch('/api/generate', {
         method: 'POST',
@@ -174,6 +176,17 @@ const Home: NextPage = () => {
             value={textValue}
             onChange={(e) => setTextValue(e.target.value)}
           />
+          <div className="flex">
+          <p className="text-white">
+          Include Nin AI response?
+          </p>
+          <input 
+              checked={ninResponse}
+              onChange={(e) => {setNinResponse(e.target.checked)}}
+              type="checkbox" 
+              id="email" 
+              className="ml-4 mt-1 form-checkbox h-5 w-5 text-gray-600" />
+          </div>
           <div className="flex">
           {allowSubmit ? (
           <button
