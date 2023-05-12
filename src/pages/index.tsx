@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import { NextPage } from 'next';
 import { useSession, signIn } from "next-auth/react"
@@ -9,10 +9,28 @@ import { useRouter } from 'next/router';
 const Home: NextPage = () => {
   const {data : session} = useSession();
   const router = useRouter()
-  const [textValue, setTextValue] = useState('');
+  const [textValue, setTextValue] = useState("");
   const [numberValue, setNumberValue] = useState<number | null>(null);
-  const [allowSubmit, setAllowSubmit] = useState<boolean>(true);
+
   const [ninResponse, setNinResponse] = useState<boolean>(router.query.pod ? false : true);
+  const [allowSubmit, setAllowSubmit] = useState<boolean>(false);
+  const [podName, setPodName] = useState("");
+  const [submitting, setSubmitting] = useState<boolean>(false);
+
+  useEffect(() => {getPodName(router.query.pod as string)}, [router]);
+  useEffect(() => {setAllowSubmit(numberValue != null)}, [numberValue]);
+
+  async function getPodName(podId: string) {
+    const response = await fetch('/api/get-pod-name', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ pod: podId }),
+    });
+    const data = await response.json();
+    setPodName(data.name);
+  }
 
   const fetchPastCheckins = async () => {
     if (session) {
@@ -66,7 +84,7 @@ const Home: NextPage = () => {
 
   const callGenerateEndpoint = async (e: React.FormEvent) => {
     e.preventDefault();
-
+    setSubmitting(true);
     const emptyReplies : [string, string][] = [] 
 
     const inputData = {
@@ -77,8 +95,9 @@ const Home: NextPage = () => {
       replies: emptyReplies,
       linkAccess: router.query.pod ? true : false,
       pod: (router.query.pod as string) ?? "",
+      shared: [],
     };
-
+    setNumberValue(null);
     if (ninResponse) {
       console.log("Calling OpenAI...");
       const response = await fetch('/api/generate', {
@@ -86,9 +105,8 @@ const Home: NextPage = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ userId: await getAccount(session?.user?.email as string) ?? 'unknown', userInput: `Mood: ${numberValue}\n`+textValue }),
+        body: JSON.stringify({ userId: await getAccount(session?.user?.email as string) ?? 'unknown', userInput: `Mood: ${inputData.rating}\n`+textValue }),
       });
-    
       const data = await response.json();
       const output = data.output;
       console.log("OpenAI replied...", output);
@@ -103,8 +121,9 @@ const Home: NextPage = () => {
       })
     }
     const checkin = (await saveUserInput(inputData)) as OutputData;
+    setSubmitting(false);
     if (inputData.pod != "") router.push(`pod/${inputData.pod}`)
-    else if (checkin._id) router.push(`checkin/${checkin._id}`);
+    else if (checkin._id) router.push(`checkin/${checkin._id}/view`);
     else setAllowSubmit(true);
   };
 
@@ -135,7 +154,7 @@ const Home: NextPage = () => {
       <Header />
       <div className="container mx-auto p-4">
         <h1 className="text-white text-4xl font-bold">Check-N-In</h1>
-        <form onSubmit={(e) => {if (allowSubmit) {setAllowSubmit(false); callGenerateEndpoint(e)}}} className="mt-8">
+        <form onSubmit={(e) => {if (allowSubmit) callGenerateEndpoint(e)}} className="mt-8">
         <p className="text-white mt-4">
           Rate your day out of 10
         </p>
@@ -146,7 +165,7 @@ const Home: NextPage = () => {
             max="10"
             step="0.01"
             placeholder="Enter a number between 1.0 and 10.0"
-            onChange={(e) => setNumberValue(parseFloat(e.target.value))}
+            onChange={(e) => {e.target.value ? setNumberValue(parseFloat(e.target.value)) : setNumberValue(null)}}
           />
         <p className="text-white mt-4">
           What happened today?
@@ -169,21 +188,26 @@ const Home: NextPage = () => {
               className="ml-4 mt-1 form-checkbox h-5 w-5 text-gray-600" />
           </div>
           <div className="flex">
-          {allowSubmit && (
+          {allowSubmit ? (
           <button
             className="mt-4 bg-white text-purple-500 font-bold py-2 px-4 rounded hover:bg-opacity-80 transition duration-150 ease-in-out"
             type="submit"
           >
             Submit
-          </button>)}
-          {!allowSubmit && (
-          <p className="mt-4">
-            Submitting...
-          </p>)}
-          {router.query.pod && 
-          <p className="ml-2 mt-6 text-white">Posting to pod</p>
+          </button>) :(
+          <button
+          className="mt-4 bg-gray-400 text-purple-500 font-bold py-2 px-4 rounded hover:bg-opacity-80 transition duration-150 ease-in-out"
+          type="submit"
+        >
+          Submit
+        </button>)}
+          {router.query.pod ? 
+          <p className="ml-2 mt-6 text-white">{`Posting to ${podName}`}</p>
+          :
+          <p className="ml-2 mt-6 text-white">Private post</p>
           }
           </div>
+          {submitting && <p className="ml-2 mt-6 text-white">Submitting...</p>}
         </form>
       </div>
     </div>

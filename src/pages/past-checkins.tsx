@@ -87,7 +87,7 @@ const PastCheckins: NextPage = () => {
         )}
         <ul className="mt-4 space-y-6">
           {sortedCheckins.map((checkin, index) => (
-            <Link href={`checkin/${checkin._id}`} key={index}>
+            <Link href={`checkin/${checkin._id}/view`} key={index}>
                 <li className="bg-white bg-opacity-20 text-white p-5 rounded hover:bg-opacity-30 cursor-pointer transition duration-150 ease-in-out shadow-lg">
                 <div className="flex justify-between items-center">
                     <div>
