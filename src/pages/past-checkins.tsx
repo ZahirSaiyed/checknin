@@ -4,7 +4,7 @@ import { useSession } from "next-auth/react";
 import { OutputData, Account } from "./api/types";
 import Header from "../components/Header";
 import RatingChart from "../components/RatingChart";
-import Link from 'next/link';
+import { useRouter } from 'next/router';
 
 const FilterDropdown: React.FC<{ onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void }> = ({ onChange }) => {
   return (
@@ -28,6 +28,7 @@ const FilterDropdown: React.FC<{ onChange: (e: React.ChangeEvent<HTMLSelectEleme
 };
 
 const PastCheckins: NextPage = () => {
+  const router = useRouter();
   const { data: session } = useSession();
   const [pastCheckins, setPastCheckins] = useState<OutputData[]>([]);
   const [filter, setFilter] = useState({ type: "date", order: "desc" });
@@ -91,6 +92,24 @@ const PastCheckins: NextPage = () => {
     }
   };
 
+  const deleteObject = (id: string) => {
+    if (session) {
+      fetch("/api/delete-object", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id, collection: "users"}),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.success) {
+            fetchPastCheckins();
+          }
+        });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-r from-purple-500 via-pink-500 to-red-500">
       <Header />
@@ -107,7 +126,7 @@ const PastCheckins: NextPage = () => {
         )}
         <ul className="mt-4 space-y-6">
           {sortedCheckins.map((checkin, index) => (
-            <Link href={`checkin/${checkin._id}/view`} key={index}>
+            <div onClick={() => router.push(`checkin/${checkin._id}/view`)} key={index} className="cursor-pointer">
                 <li className="bg-white bg-opacity-20 text-white p-5 rounded hover:bg-opacity-30 cursor-pointer transition duration-150 ease-in-out shadow-lg">
                 <div className="flex justify-between items-center">
                     <div>
@@ -121,13 +140,24 @@ const PastCheckins: NextPage = () => {
                       </div>
                       <p className="text-sm">{new Date(checkin.timeStamp).toLocaleDateString()}</p>
                     </div>
-                    <div className="flex items-center">
-                      <p className="text-xl font-bold mr-2">{checkin.rating}</p>
-                      <span className="text-sm">/ 10</span>
+                    <div className="flex">
+                      <div className="flex items-center">
+                        <p className="text-xl font-bold mr-2">{checkin.rating}</p>
+                        <span className="text-sm">/ 10</span>
+                      </div>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deleteObject(checkin._id)
+                        }}
+                        className="ml-4 bg-red-500 text-white font-bold py-2 px-4 rounded hover:bg-opacity-80 transition duration-150 ease-in-out"
+                      >
+                        Delete
+                      </button>
                     </div>
                   </div>
                 </li>
-            </Link>
+            </div>
           ))}
         </ul>
       </div>
