@@ -266,7 +266,13 @@ const CheckIn: NextPage = () => {
                 }`}
             >
                 <div>
-                <b>{user}</b>
+                    {user=="Nin" ?
+                    <div className="flex">
+                    <b className="mt-1">{user}</b>
+                     <img className="ml-2 rounded-full h-9" src="/nin.jpg" alt=""/>
+                     </div> : 
+                     <b>{user}</b>}
+                
                 <p> {text}</p>
                 </div>
                 <button
