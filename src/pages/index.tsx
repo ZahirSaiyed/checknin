@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import { NextPage } from 'next';
 import { useSession, signIn } from "next-auth/react"
-import { InputData, OutputData } from '../pages/api/types';
+import { InputData, OutputData, Pod } from '../pages/api/types';
 import Header from '../components/Header';
 import { useRouter } from 'next/router';
 
@@ -62,7 +62,7 @@ const Home: NextPage = () => {
         return;
     } 
     const data = await response.json();
-    return data.username
+    return data.account.username
 }
 
   const saveUserInput = async (inputData: InputData) => {
@@ -82,21 +82,45 @@ const Home: NextPage = () => {
     }
   };
 
+  function canAccess(pod: Pod) {
+    return session && pod && ((session?.user?.email === pod?.userId) 
+    || pod.linkAccess
+    || pod.shared?.includes(session?.user?.email as string))
+  }
+
+  const fetchPod = async (id : string | null) => {
+    if (session && id) {
+      const response = await fetch('/api/get-pod', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ _id: id}),
+      })
+      const data = await response.json()
+      return data.pod;
+    }
+  }
+
   const callGenerateEndpoint = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
     const emptyReplies : [string, string][] = [] 
 
     const inputData = {
-      userId: session?.user?.email ?? 'unknown', // assuming the user object has an 'id' field
+      userId: session?.user?.email ?? 'unknown',
       text: textValue,
       rating: numberValue || 0,
       timeStamp: new Date(),
       replies: emptyReplies,
-      linkAccess: router.query.pod ? true : false,
+      linkAccess: false,
       pod: (router.query.pod as string) ?? "",
       shared: [],
     };
+    if (router.query.pod) {
+      const pod = await fetchPod(router.query.pod as string)
+      if (!canAccess(pod)) return;
+    }
     setNumberValue(null);
     if (ninResponse) {
       console.log("Calling OpenAI...");
@@ -122,7 +146,7 @@ const Home: NextPage = () => {
     }
     const checkin = (await saveUserInput(inputData)) as OutputData;
     setSubmitting(false);
-    if (inputData.pod != "") router.push(`pod/${inputData.pod}`)
+    if (inputData.pod != "") router.push(`pod/${inputData.pod}/view`)
     else if (checkin._id) router.push(`checkin/${checkin._id}/view`);
     else setAllowSubmit(true);
   };

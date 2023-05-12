@@ -1,7 +1,7 @@
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import { useState, useEffect, useRef} from 'react';
-import { OutputData } from '../../api/types';
+import { OutputData, Pod } from '../../api/types';
 import { useSession, signIn } from "next-auth/react";
 import Link from 'next/link';
 import Header from '../../../components/Header';
@@ -12,6 +12,7 @@ const CheckIn: NextPage = () => {
     const router = useRouter();
     const { id } = router.query;
     const [thread, setThread] = useState<OutputData>();
+    const [pod, setPod] = useState<Pod>();
     const [textValue, setTextValue] = useState('');
     const [isAITyping, setIsAITyping] = useState(false);
     const [usernames, setUsernames] = useState<{ [email: string]: string }>({});
@@ -19,6 +20,8 @@ const CheckIn: NextPage = () => {
     const [feedbackValue, setFeedbackValue] = useState('');
     const chatBottomRef = useRef<HTMLDivElement | null>(null);
 
+    useEffect(() => {thread && session && updateNotifs()}, [thread, session]);
+    useEffect(() => {thread && thread.pod && fetchPod(thread.pod)}, [thread, session]);
     useEffect(() => {fetchThread(id?.toString() || null)}, [session, router]);
     useEffect(() => {session && thread && (session?.user?.email == thread?.userId) && textValue == '' && (!thread.pod || thread.pod == '') && setTextValue("@Nin ")}, [thread, session])
     useEffect(() => {(session?.user?.email && getAccount(session.user.email))}, [session]);
@@ -28,6 +31,20 @@ const CheckIn: NextPage = () => {
         }, 5000); // Refresh every 5 seconds
         return () => clearInterval(interval); // Cleanup function
       }, []);
+
+    const fetchPod = async (id : string | null) => {
+        if (session && id && id != "") {
+            const response = await fetch('/api/get-pod', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ _id: id}),
+            })
+            const data = await response.json()
+            setPod(data.pod);
+        }
+    }
 
     async function getAccount(email: string) {
         if(usernames[email]) return usernames[email];
@@ -46,7 +63,7 @@ const CheckIn: NextPage = () => {
             return;
         } 
         const data = await response.json();
-        setUsernames(prevState => ({ ...prevState, [email]: data.username }))
+        setUsernames(prevState => ({ ...prevState, [email]: data.account.username }))
     }
 
     const scrollToBottom = () => {
@@ -71,6 +88,22 @@ const CheckIn: NextPage = () => {
           console.error('Error saving input:', error);
         } else {
             fetchThread(id?.toString() || null);
+        }
+      };
+
+    const updateNotifs = async () => {
+        if(thread?.replies) {
+            const response = await fetch('/api/update-notifs', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({id, userId: session?.user?.email, notifs: 1+thread.replies.length}),
+            });
+            if (!response.ok) {
+            const error = await response.json();
+            console.error('Error saving input:', error);
+            }
         }
       };
 
@@ -159,7 +192,10 @@ const CheckIn: NextPage = () => {
     function canAccess() {
         return session && thread && ((session?.user?.email === thread?.userId) 
         || thread.linkAccess
-        || thread.shared?.includes(session?.user?.email as string))
+        || thread.shared?.includes(session?.user?.email as string)
+        || (pod && pod.shared.includes(session?.user?.email as string))
+        || (pod && pod.linkAccess)
+        || (pod && pod.userId === session?.user?.email))
     }
 
     if (feedback && session) {

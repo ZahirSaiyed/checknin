@@ -6,7 +6,7 @@ const savePod = async (email: string, name: string): Promise<string> => {
   console.log('Saving user input:', email, name); // Add this log
   
   try {
-        const newPod = {userId: email, name: name}
+        const newPod = {userId: email, name: name, linkAccess: false, shared: [email]}
         const client = await clientPromise;
         const collection = client.db("checkins").collection("pods");
         const result = await collection.insertOne(newPod);
@@ -14,14 +14,6 @@ const savePod = async (email: string, name: string): Promise<string> => {
         // Check if the insertion was successful and return true if it was
         if (result.acknowledged) {
             const podId = (await collection.find(newPod).toArray())[0]._id.toString();
-            const accountCollection = client.db("checkins").collection("accounts");
-            const oldPods = (await accountCollection.find({ userId: email }).toArray())[0].pods
-            if (oldPods) {
-              oldPods.push([name,podId])
-              const result = await accountCollection.updateMany({userId: email}, {$set: { pods: oldPods}})
-            } else {
-              const result = await accountCollection.updateMany({userId: email}, {$set: { pods: [[name,podId]]}});
-            }
             return podId;
         } else {
             return "";

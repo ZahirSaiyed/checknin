@@ -26,4 +26,13 @@ export type Pod = {
   _id: string;
   userId: string;
   name: string;
+  linkAccess: boolean;
+  shared: string[];
 };  
+
+export type Account = {
+  _id: string;
+  username: string, 
+  list: boolean,
+  notifs: {[id: string]: number}
+}

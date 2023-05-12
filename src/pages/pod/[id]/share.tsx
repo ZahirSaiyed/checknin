@@ -1,24 +1,25 @@
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import { useState, useEffect, useRef} from 'react';
-import { OutputData } from '../../api/types';
+import { Pod } from '../../api/types';
 import { useSession, signIn } from "next-auth/react";
 import Link from 'next/link';
 import Header from '../../../components/Header';
 import Head from 'next/head';
 
-const CheckIn: NextPage = () => {
+const PodShare: NextPage = () => {
     const {data : session} = useSession();
     const router = useRouter();
     const { id } = router.query;
-    const [thread, setThread] = useState<OutputData>();
+    const [pod, setPod] = useState<Pod>();
     const [textValue, setTextValue] = useState('');
-    const url = `https://checknin.up.railway.app/checkin/${id}/view`;
+    const url = `https://checknin.up.railway.app/pod/${id}/view`;
 
-    useEffect(() => {fetchThread(id?.toString() || null)}, [session, router]);
-    const fetchThread = (id : string | null) => {
+    useEffect(() => {fetchPod(id?.toString() || null)}, [session, router]);
+
+    const fetchPod = (id : string | null) => {
         if (session && id) {
-          fetch('/api/get-thread', {
+          fetch('/api/get-pod', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -28,7 +29,7 @@ const CheckIn: NextPage = () => {
             .then((response) => response.json())
             .then((data) => {
               if (data.success) {
-                setThread(data.thread[0]);
+                setPod(data.pod);
               }
             });
         }
@@ -36,11 +37,11 @@ const CheckIn: NextPage = () => {
 
     const handleShare = (e: React.FormEvent) => {
         e.preventDefault();
-        if (thread) {
+        if (pod) {
             const data = {
                 title: 'Check-N-In',
                 url: url,
-                text: `Check out my Check-N-In!`
+                text: `Check out my pod: ${pod.name}`
             }
             if (navigator.canShare(data)) {
                 navigator.share(data).catch(console.error)
@@ -50,54 +51,54 @@ const CheckIn: NextPage = () => {
 
     const toggleLinkAccess = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (thread) {
-            if (thread.linkAccess) {
-                thread.linkAccess = !(thread.linkAccess)
+        if (pod) {
+            if (pod.linkAccess) {
+                pod.linkAccess = !(pod.linkAccess)
             } else {
-                thread.linkAccess = true
+                pod.linkAccess = true
             }
             const response = await fetch('/api/update-access', {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({collection: "users", id, linkAccess: thread.linkAccess}),
+                body: JSON.stringify({collection: "pods", id, linkAccess: pod.linkAccess}),
               });
               if (!response.ok) {
                 const error = await response.json();
                 console.error('Error saving input:', error);
               } else {
-                  fetchThread(id?.toString() || null);
+                  fetchPod(id?.toString() || null);
               }
         }
     }
 
     const addUser = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (thread) {
+        if (pod) {
             const response = await fetch('/api/update-users', {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({collection: "users", id, user: textValue}),
+                body: JSON.stringify({collection: "pods", id, user: textValue}),
               });
               setTextValue("");
               if (!response.ok) {
                 const error = await response.json();
                 console.error('Error saving input:', error);
               } else {
-                  fetchThread(id?.toString() || null);
+                  fetchPod(id?.toString() || null);
               }
         }
     }
 
-    if (session && thread && (!thread.pod || thread.pod == "") && session?.user?.email === thread.userId) {
+    if (session && pod && session?.user?.email === pod.userId) {
         return (
             <div className="min-h-screen bg-gradient-to-r from-purple-500 via-pink-500 to-red-500">
                 <Header />
                 <div className="mx-auto p-1 rounded flex justify-center items-center">
-                    {<p> Access: {thread.linkAccess ? "Public" : "Private"}</p>}
+                    {<p> Access: {pod.linkAccess ? "Public" : "Private"}</p>}
                     <button
                         className="ml-4 bg-white text-purple-500 font-bold py-2 px-4 rounded hover:bg-opacity-80 transition duration-150 ease-in-out"
                         type="submit"
@@ -108,13 +109,13 @@ const CheckIn: NextPage = () => {
                     <button
                         className="ml-4 bg-white text-purple-500 font-bold py-2 px-4 rounded hover:bg-opacity-80 transition duration-150 ease-in-out"
                         type="submit"
-                        onClick = {() => router.push(`/checkin/${id}/view`)}
+                        onClick = {() => router.push(`/pod/${id}/view`)}
                     >
                         Back
                 </button>
                 </div>
                 <div className="mx-auto p-1 rounded flex justify-center items-center">
-                <p> {thread.linkAccess 
+                <p> {pod.linkAccess 
                 ? "Anyone with link can access" 
                 : "Listed users with link can access"}
                 </p>
@@ -126,9 +127,9 @@ const CheckIn: NextPage = () => {
                     Share Link
                 </button>
                 </div>
-                {!thread.linkAccess && 
+                {!pod.linkAccess && 
                 <div className="max-w-2xl mx-auto bg-white bg-opacity-10 rounded-lg space-y-4 p-4">
-        {thread?.shared?.map((user, index) => (
+        {pod?.shared?.map((user, index) => (
             <div
                 key={index}
                 className="bg-white bg-opacity-20 text-white p-1 rounded max-w-2xl mx-auto my-1"
@@ -176,7 +177,7 @@ const CheckIn: NextPage = () => {
                 </button>
               </div>
             </div>)
-    } else if (thread) {
+    } else if (pod) {
         return (
         <div className="min-h-screen bg-gradient-to-r from-purple-500 via-pink-500 to-red-500">
             <p>Improper permissions</p>
@@ -196,4 +197,4 @@ const CheckIn: NextPage = () => {
     }
 }
 
-export default CheckIn;
+export default PodShare;
