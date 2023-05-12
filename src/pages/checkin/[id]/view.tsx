@@ -207,11 +207,11 @@ const CheckIn: NextPage = () => {
               <h1 className="text-white text-4xl font-bold">Check-N-In</h1>
               <form onSubmit={(e) => {submitFeedback(e)}} className="mt-8">
               <p className="text-white mt-4">
-                Please take some time to give us your feedback!
+                Please tell use how we can improve!
               </p>
                 <textarea
                   className="block w-full bg-white bg-opacity-20 text-white placeholder-white placeholder-opacity-50 border border-white border-opacity-20 rounded p-2 focus:outline-none focus:border-white mt-4 mb-4"
-                  placeholder="I think..."
+                  placeholder="I want this new feature, there is this bug, I don't like this..."
                   value={feedbackValue}
                   onChange={(e) => setFeedbackValue(e.target.value)}
                 />
