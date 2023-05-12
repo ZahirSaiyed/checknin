@@ -97,6 +97,24 @@ const PastCheckins: NextPage = () => {
     }
   };
 
+  const deleteObject = (id: string) => {
+    if (session) {
+      fetch("/api/delete-object", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id, collection: "pods"}),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.success) {
+            fetchPods();
+          }
+        });
+    }
+  };
+
   async function saveNewPod(podName: string) {
     if (session) {
       const response = await fetch("/api/create-pod", {
@@ -150,7 +168,7 @@ const PastCheckins: NextPage = () => {
 </div>
         <ul className="mt-4 space-y-6">
           {pods.map((pod, index) => (
-            <Link href={`pod/${pod._id}/view`} key={index}>
+            <div onClick={() => router.push(`pod/${pod._id}/view`)} key={index} className="cursor-pointer">
                 <li className="bg-white bg-opacity-20 text-white p-5 rounded hover:bg-opacity-30 cursor-pointer transition duration-150 ease-in-out shadow-lg">
                 <div className="flex justify-between items-center">
                     <div className="flex">
@@ -161,12 +179,22 @@ const PastCheckins: NextPage = () => {
                         </span>
                       )}
                     </div>
+                    {pod.userId == session?.user?.email &&
+                    <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deleteObject(pod._id)
+                          }
+                        }
+                        className="ml-4 bg-red-500 text-white font-bold py-2 px-4 rounded hover:bg-opacity-80 transition duration-150 ease-in-out"
+                      >
+                        Delete
+                      </button>}
                   </div>
                 </li>
-            </Link>
+                </div>
           ))}
         </ul>
-        
       </div>
     </div>
   );
