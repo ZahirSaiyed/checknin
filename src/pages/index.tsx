@@ -4,6 +4,7 @@ import { NextPage } from 'next';
 import { useSession, signIn } from "next-auth/react"
 import { InputData, OutputData, Pod } from '../pages/api/types';
 import Header from '../components/Header';
+import Landing from '../components/Landing';
 import { useRouter } from 'next/router';
 
 const Home: NextPage = () => {
@@ -157,18 +158,7 @@ const Home: NextPage = () => {
           <title>Check-N-In</title>
           <link rel="shortcut icon" href="../../public/logo.png"/>
         </Head>
-        <div className="text-center">
-          <h1 className="text-white text-6xl font-bold">Check-N-In</h1>
-          <p className="text-white text-xl mt-4 mb-8">
-            Track your daily emotions and gain insights.
-          </p>
-          <button
-            onClick={() => signIn()}
-            className="bg-white text-purple-500 font-bold py-2 px-4 rounded hover:bg-opacity-80 transition duration-150 ease-in-out"
-          >
-            Log In
-          </button>
-        </div>
+        <Landing />
       </div>
     )
   }

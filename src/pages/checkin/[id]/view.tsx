@@ -5,6 +5,7 @@ import { OutputData, Pod } from '../../api/types';
 import { useSession, signIn } from "next-auth/react";
 import Link from 'next/link';
 import Header from '../../../components/Header';
+import Landing from '../../../components/Landing';
 import Head from 'next/head';
 
 const CheckIn: NextPage = () => {
@@ -330,18 +331,7 @@ const CheckIn: NextPage = () => {
               <Head>
                 <title>Check-N-In</title>
               </Head>
-              <div className="text-center">
-                <h1 className="text-white text-6xl font-bold">Check-N-In</h1>
-                <p className="text-white text-xl mt-4 mb-8">
-                  Track your daily emotions and gain insights.
-                </p>
-                <button
-                  onClick={() => signIn()}
-                  className="bg-white text-purple-500 font-bold py-2 px-4 rounded hover:bg-opacity-80 transition duration-150 ease-in-out"
-                >
-                  Log In
-                </button>
-              </div>
+              <Landing />
             </div>)
     } else if (thread) {
         return (
