@@ -7,7 +7,8 @@ import type { WithId, Document } from 'mongodb'
 function canAccess(user: string, thread: WithId<Document>, owner: string) {
   return thread && ((user === owner) 
   || thread.linkAccess
-  || thread.shared?.includes(user))
+  || thread.shared?.includes(user)
+  || (thread.pod && thread.pod != ""))
 }
 
 const updateThread = async (id: string, user: string, userId: string, ownerId: string, text: string): Promise<boolean> => {
