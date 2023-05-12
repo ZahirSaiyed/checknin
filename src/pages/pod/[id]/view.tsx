@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import { useSession, signIn } from "next-auth/react";
 import { OutputData, Pod, Account } from "../../api/types";
 import Header from "../../../components/Header";
+import Landing from '../../../components/Landing';
 import Link from 'next/link';
 import Head from 'next/head';
 
@@ -173,18 +174,7 @@ const PodView: NextPage = () => {
           <Head>
             <title>Check-N-In</title>
           </Head>
-          <div className="text-center">
-            <h1 className="text-white text-6xl font-bold">Check-N-In</h1>
-            <p className="text-white text-xl mt-4 mb-8">
-              Track your daily emotions and gain insights.
-            </p>
-            <button
-              onClick={() => signIn()}
-              className="bg-white text-purple-500 font-bold py-2 px-4 rounded hover:bg-opacity-80 transition duration-150 ease-in-out"
-            >
-              Log In
-            </button>
-          </div>
+          <Landing />
         </div>)
 } else if (pod) {
   return (
