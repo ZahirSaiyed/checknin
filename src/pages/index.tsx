@@ -11,7 +11,6 @@ const Home: NextPage = () => {
   const router = useRouter()
   const [textValue, setTextValue] = useState("");
   const [numberValue, setNumberValue] = useState<number | null>(null);
-
   const [ninResponse, setNinResponse] = useState<boolean>(router.query.pod ? false : true);
   const [allowSubmit, setAllowSubmit] = useState<boolean>(false);
   const [podName, setPodName] = useState("");

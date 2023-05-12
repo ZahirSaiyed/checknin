@@ -39,9 +39,9 @@ const PodShare: NextPage = () => {
         e.preventDefault();
         if (pod) {
             const data = {
-                title: 'Check-N-In',
+                title: "send me a checkin bruh",
                 url: url,
-                text: `Check out my pod: ${pod.name}`
+                text: "send me a checkin bruh"
             }
             if (navigator.canShare(data)) {
                 navigator.share(data).catch(console.error)
