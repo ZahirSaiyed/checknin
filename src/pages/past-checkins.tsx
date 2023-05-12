@@ -10,7 +10,7 @@ const FilterDropdown: React.FC<{ onChange: (e: React.ChangeEvent<HTMLSelectEleme
   return (
     <div className="relative w-56">
       <select
-        className="block appearance-none w-full bg-white bg-opacity-20 text-white py-2 pr-8 pl-4 rounded-lg leading-tight focus:outline-none"
+        className="block appearance-none w-full bg-gray-950 bg-opacity-20 text-white py-2 pr-8 pl-4 rounded-lg leading-tight focus:outline-none"
         onChange={onChange}
       >
         <option value="date-desc">Date (Newest First)</option>
